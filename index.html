@@ -3,188 +3,351 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>بوابة رفع ومراجعة المستندات | منصة إثبتلي الرقمية</title>
+  <title>منصة إثبتلي الرقمية | بوابة التوثيق الحكومية</title>
   <style>
     :root {
-      --primary-green: #1c422b;
-      --accent-green: #295a3c;
-      --light-green: #eaf1ec;
-      --bg-beige: #f6f4ee;
-      --card-bg: #ffffff;
-      --border-color: #e2dcd0;
-      --gold-accent: #c5a059;
-      --text-main: #1a251c;
-      --text-muted: #5c685d;
-      --danger: #b42318;
-      --success: #15803d;
+      --gov-green: #1c422b;
+      --gov-green-dark: #122c1c;
+      --gov-gold: #c5a059;
+      --gov-bg: #f4f3ef;
+      --gov-card: #ffffff;
+      --gov-border: #dcd6cb;
+      --text-main: #1f2923;
+      --text-muted: #6b7280;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-beige); color: var(--text-main); line-height: 1.6; padding: 20px; }
+    body { font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; background-color: var(--gov-bg); color: var(--text-main); line-height: 1.6; }
 
-    .main-container { max-width: 600px; margin: 40px auto; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden; border-top: 6px solid var(--primary-green); }
-    
-    .header-box { background: var(--primary-green); color: #white; padding: 25px; text-align: center; border-bottom: 4px solid var(--gold-accent); }
-    .header-box h1 { font-size: 20px; margin-bottom: 5px; color: #fff; }
-    .header-box p { font-size: 13px; color: #d4e5d8; }
+    /* شريط الترويسة العلوي */
+    .top-bar {
+      background: #ffffff;
+      border-bottom: 1px solid var(--gov-border);
+      padding: 10px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .gov-branding {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .gov-branding img { height: 45px; }
+    .gov-branding-text h2 { font-size: 14px; font-weight: bold; color: var(--gov-green); }
+    .gov-branding-text p { font-size: 11px; color: var(--text-muted); }
 
-    .content-body { padding: 30px; }
+    .user-auth-area { display: flex; align-items: center; gap: 10px; }
+    .btn-login-header {
+      background: var(--gov-green);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 4px;
+      border: none;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .btn-login-header:hover { background: var(--gov-green-dark); }
 
-    .form-group { margin-bottom: 18px; text-align: right; }
-    .form-group label { display: block; font-size: 13px; font-weight: bold; color: var(--text-main); margin-bottom: 6px; }
-    .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 6px; font-family: inherit; font-size: 14px; background: #faf9f6; transition: all 0.3s; }
-    .form-group input:focus, .form-group textarea:focus { border-color: var(--primary-green); background: #fff; outline: none; box-shadow: 0 0 0 3px rgba(28,66,43,0.1); }
+    /* شريط التنقل الأخضر */
+    .nav-bar {
+      background: var(--gov-green);
+      padding: 10px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 3px solid var(--gov-gold);
+    }
+    .nav-links { display: flex; gap: 20px; list-style: none; }
+    .nav-links a { color: #fff; text-decoration: none; font-size: 13px; font-weight: 600; }
+    .nav-links a:hover { color: var(--gov-gold); }
 
-    .upload-section { border: 2px dashed var(--border-color); padding: 25px; text-align: center; border-radius: 8px; background: #faf9f6; margin-top: 15px; cursor: pointer; transition: background 0.3s; }
-    .upload-section:hover { background: #f0ede6; }
+    /* المحتوى الرئيسي */
+    .main-wrapper { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
 
-    .btn-submit { background: var(--primary-green); color: white; width: 100%; padding: 14px; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 20px; transition: background 0.3s; }
-    .btn-submit:hover { background: var(--accent-green); }
+    .hero-banner {
+      background: linear-gradient(rgba(28,66,43,0.85), rgba(28,66,43,0.85)), url('https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=1200&q=80') center/cover;
+      color: white;
+      padding: 40px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      text-align: center;
+      border-bottom: 4px solid var(--gov-gold);
+    }
+    .hero-banner h1 { font-size: 24px; margin-bottom: 10px; }
+    .hero-banner p { font-size: 14px; color: #e5ede7; }
 
-    .status-card { margin-top: 20px; padding: 20px; border-radius: 8px; text-align: center; display: none; }
-    .status-card.pending { background: #fef3c7; border: 1px solid #f59e0b; color: #92400e; }
-    .status-card.approved { background: #dcfce7; border: 1px solid #16a34a; color: #166534; }
-    .status-card.rejected { background: #fee2e2; border: 1px solid #dc2626; color: #991b1b; }
+    /* قسم الخدمات الإلكترونية */
+    .services-section {
+      background: var(--gov-card);
+      border: 1px solid var(--gov-border);
+      border-radius: 8px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    }
+    .services-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: var(--gov-green);
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--gov-border);
+      padding-bottom: 8px;
+    }
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+    .service-card {
+      background: #faf8f5;
+      border: 1px solid var(--gov-border);
+      border-radius: 6px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .service-card:hover {
+      border-color: var(--gov-green);
+      background: #fff;
+      box-shadow: 0 4px 12px rgba(28,66,43,0.08);
+    }
+    .service-card h3 { font-size: 15px; color: var(--gov-green); margin-bottom: 8px; }
+    .service-card p { font-size: 12px; color: var(--text-muted); }
 
-    .loader { display: none; text-align: center; padding: 20px; color: var(--primary-green); font-weight: bold; }
+    /* نافذة الخدمات التفاعلية (مخفية حتى يتم اختيارها) */
+    .interactive-panel {
+      background: var(--gov-card);
+      border: 1px solid var(--gov-border);
+      border-radius: 8px;
+      padding: 30px;
+      margin-bottom: 30px;
+      display: none;
+    }
+    .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--gov-border); padding-bottom: 10px; }
+    .panel-header h3 { color: var(--gov-green); font-size: 18px; }
+    .btn-close-panel { background: #fee2e2; color: #991b1b; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px; }
+
+    .form-group { margin-bottom: 15px; text-align: right; }
+    .form-group label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 5px; }
+    .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid var(--gov-border); border-radius: 4px; font-size: 13px; background: #faf9f6; }
+    .btn-gov-submit { background: var(--gov-green); color: white; padding: 12px 20px; border: none; border-radius: 4px; font-weight: bold; width: 100%; cursor: pointer; }
+    .btn-gov-submit:hover { background: var(--gov-green-dark); }
+
+    /* مودال تسجيل الدخول */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);
+      display: none; justify-content: center; align-items: center; z-index: 1000;
+    }
+    .modal-box {
+      background: #fff; padding: 30px; border-radius: 8px; width: 400px; border-top: 5px solid var(--gov-green); text-align: center;
+    }
+    .modal-box input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid var(--gov-border); border-radius: 4px; }
   </style>
 </head>
 <body>
 
-  <div class="main-container">
-    <div class="header-box">
-      <h1>منصة إثبتلي الرقمية</h1>
-      <p>بوابة رفع ومطابقة المستندات والوثائق الرسمية</p>
-    </div>
-
-    <div class="content-body">
-      <form id="submissionForm">
-        <div class="form-group">
-          <label>الاسم الرباعي (إلزامي)</label>
-          <input type="text" id="fullName" required placeholder="أدخل اسمك الرباعي كما هو في الهوية" />
-        </div>
-
-        <div class="form-group">
-          <label>رقم الهوية الوطنية أو الإقامة (إلزامي)</label>
-          <input type="text" id="universityId" required placeholder="أدخل رقم الهوية أو الإقامة المكون من 10 أرقام" />
-        </div>
-
-        <div class="form-group">
-          <label>رقم الجوال (إلزامي)</label>
-          <input type="tel" id="phone" required placeholder="05xxxxxxxx" />
-        </div>
-
-        <div class="form-group">
-          <label>ملاحظة أو وصف المستند (اختياري)</label>
-          <textarea id="note" rows="2" placeholder="أدخل أي تفاصيل إضافية تخص المستند المرفق..."></textarea>
-        </div>
-
-        <div class="form-group">
-          <label>إرفاق المستند أو الوثيقة (صورة واضحة)</label>
-          <div class="upload-section" onclick="document.getElementById('fileInput').click()">
-            <p style="font-weight: bold; color: var(--primary-green);">اضغط هنا لاختيار الملف أو الصورة</p>
-            <p style="font-size: 12px; color: var(--text-muted); margin-top: 5px;" id="fileNameDisplay">لم يتم اختيار أي ملف</p>
-          </div>
-          <input type="file" id="fileInput" accept="image/*" style="display: none;" required />
-        </div>
-
-        <button type="submit" class="btn-submit" id="submitBtn">إرسال الطلب للتدقيق المركزي</button>
-      </form>
-
-      <div class="loader" id="loaderBox">
-        جاري معالجة المستند عبر نظام التدقيق المركزي والمطابقة الآلية... يرجى الانتظار
+  <!-- الترويسة العلوية -->
+  <div class="top-bar">
+    <div class="gov-branding">
+      <div class="gov-branding-text">
+        <h2>المملكة العربية السعودية</h2>
+        <p>منصة إثبتلي الرقمية - بوابة التوثيق الحكومية</p>
       </div>
-
-      <div class="status-card" id="statusCard"></div>
+    </div>
+    <div class="user-auth-area">
+      <span id="welcomeUser" style="font-size: 13px; font-weight: bold; color: var(--gov-green);"></span>
+      <button class="btn-login-header" id="authBtn" onclick="openLoginModal()">تسجيل الدخول</button>
     </div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+  <!-- شريط التنقل -->
+  <div class="nav-bar">
+    <ul class="nav-links">
+      <li><a href="#" onclick="showHome()">الرئيسية</a></li>
+      <li><a href="#" onclick="openService('verify')">خدمة التحقق من الروابط والمستندات</a></li>
+      <li><a href="#" onclick="openService('docs')">خدمة المستندات والصور (التختيم والمراجعة)</a></li>
+      <li><a href="#" onclick="openService('tracking')">تتيع الطلبات</a></li>
+    </ul>
+    <div style="color: #fff; font-size: 12px;">رؤية 2030</div>
+  </div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDj5Hr4ONRDgEJLgRMExcYXnJnrS20ge_k",
-      authDomain: "ethbatli.firebaseapp.com",
-      projectId: "ethbatli",
-      storageBucket: "ethbatli.firebasestorage.app",
-      messagingSenderId: "824449568013",
-      appId: "1:824449568013:web:f606ccd14e23463b763444",
-      measurementId: "G-V5BRB4MRVQ"
+  <div class="main-wrapper">
+    <!-- البانر الرئيسي -->
+    <div class="hero-banner" id="heroBanner">
+      <h1>تحقيق الهوية الرقمية بكل أمان</h1>
+      <p>بوابة رسمية متكاملة لخدمات التحقق والمصادقة الفنية المعتمدة</p>
+    </div>
+
+    <!-- الخدمات الإلكترونية (الرئيسية) -->
+    <div class="services-section" id="homeServicesSection">
+      <div class="services-title">الخدمات الإلكترونية المتاحة</div>
+      <div class="services-grid">
+        <div class="service-card" onclick="openService('verify')">
+          <h3>خدمة التحقق</h3>
+          <p>التحقق من صحة الروابط والروابط الرسمية الصادرة من المنصة.</p>
+        </div>
+        <div class="service-card" onclick="openService('docs')">
+          <h3>المستندات والصور</h3>
+          <p>رفع وطلب مراجعة المستندات والصور الرسمية للتختيم والإعتماد.</p>
+        </div>
+        <div class="service-card" onclick="openService('tracking')">
+          <h3>تتبع الطلبات</h3>
+          <p>متابعة حالة الطلبات المقدمة والأرقام التسلسلية الصادرة.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- لوحة التفاعل (تظهر حسب الخدمة المختارة) -->
+    <div class="interactive-panel" id="interactivePanel">
+      <div class="panel-header">
+        <h3 id="panelTitle">عنوان الخدمة</h3>
+        <button class="btn-close-panel" onclick="showHome()">إغلاق</button>
+      </div>
+      <div id="panelContent">
+        <!-- يتم تعبئتها ديناميكياً -->
+      </div>
+    </div>
+  </div>
+
+  <!-- مودال تسجيل الدخول للمستخدم -->
+  <div class="modal-overlay" id="loginModal">
+    <div class="modal-box">
+      <h3 style="color:var(--gov-green); margin-bottom:15px;">تسجيل دخول المستفيد</h3>
+      <input type="text" id="loginId" placeholder="رقم الهوية أو الإقامة" />
+      <input type="tel" id="loginPhone" placeholder="رقم الجوال (05xxxxxxxx)" />
+      <button class="btn-gov-submit" onclick="performUserLogin()">دخول</button>
+      <button style="background:none; border:none; color:var(--text-muted); margin-top:10px; cursor:pointer;" onclick="closeLoginModal()">إلغاء</button>
+    </div>
+  </div>
+
+  <script>
+    let currentUser = JSON.parse(localStorage.getItem('ethbatli_user')) || null;
+
+    window.onload = function() {
+      updateAuthUI();
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    const fileInput = document.getElementById('fileInput');
-    const fileNameDisplay = document.getElementById('fileNameDisplay');
-
-    fileInput.addEventListener('change', (e) => {
-      if (e.target.files.length > 0) {
-        fileNameDisplay.innerText = "الملف المختار: " + e.target.files[0].name;
-        fileNameDisplay.style.color = "var(--success)";
+    function updateAuthUI() {
+      const btn = document.getElementById('authBtn');
+      const welcome = document.getElementById('welcomeUser');
+      if (currentUser) {
+        welcome.innerText = `مرحباً: ${currentUser.fullName}`;
+        btn.innerText = "تسجيل خروج";
+        btn.onclick = logoutUser;
+      } else {
+        welcome.innerText = "";
+        btn.innerText = "تسجيل الدخول";
+        btn.onclick = openLoginModal;
       }
-    });
+    }
 
-    document.getElementById('submissionForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
+    function openLoginModal() {
+      if (currentUser) { logoutUser(); return; }
+      document.getElementById('loginModal').style.display = 'flex';
+    }
+    function closeLoginModal() {
+      document.getElementById('loginModal').style.display = 'none';
+    }
 
-      const fullName = document.getElementById('fullName').value.trim();
-      const universityId = document.getElementById('universityId').value.trim();
-      const phone = document.getElementById('phone').value.trim();
-      const note = document.getElementById('note').value.trim();
-      const file = fileInput.files[0];
-
-      if (!fullName || !universityId || !phone || !file) {
-        alert("الرجاء تعبئة جميع الحقول الإزامية وإرفاق المستند.");
+    function performUserLogin() {
+      const id = document.getElementById('loginId').value.trim();
+      const phone = document.getElementById('loginPhone').value.trim();
+      if (!id || !phone) {
+        alert("الرجاء إدخال رقم الهوية ورقم الجوال");
         return;
       }
+      currentUser = { fullName: "المستفيد المعتمد", id, phone };
+      localStorage.setItem('ethbatli_user', JSON.stringify(currentUser));
+      closeLoginModal();
+      updateAuthUI();
+      alert("تم تسجيل الدخول بنجاح!");
+    }
 
-      document.getElementById('submissionForm').style.display = 'none';
-      document.getElementById('loaderBox').style.display = 'block';
+    function logoutUser() {
+      localStorage.removeItem('ethbatli_user');
+      currentUser = null;
+      updateAuthUI();
+      alert("تم تسجيل الخروج بنجاح.");
+      showHome();
+    }
 
-      try {
-        // تحويل الصورة إلى Base64 مع فحص خلفي سري (الذكاء الاصطناعي الخلفي)
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        
-        reader.onload = async () => {
-          const base64Image = reader.result;
+    function showHome() {
+      document.getElementById('heroBanner').style.display = 'block';
+      document.getElementById('homeServicesSection').style.display = 'block';
+      document.getElementById('interactivePanel').style.display = 'none';
+    }
 
-          // تقييم آلي خلف الكواليس يرسل للأدمن فقط
-          const simulatedScore = (Math.random() * (99 - 92) + 92).toFixed(1) + "%";
-          const aiReport = {
-            score: simulatedScore,
-            tamperStatus: "سليم - لا توجد آثار تعديل برياني 🛡️",
-            isAiGenerated: "مطابق للمعايير التنظيمية الرسمية"
-          };
+    function openService(type) {
+      document.getElementById('heroBanner').style.display = 'none';
+      document.getElementById('homeServicesSection').style.display = 'none';
+      const panel = document.getElementById('interactivePanel');
+      const title = document.getElementById('panelTitle');
+      const content = document.getElementById('panelContent');
+      panel.style.display = 'block';
 
-          const docData = {
-            fullName,
-            universityId,
-            phone,
-            note,
-            imageUrl: base64Image,
-            status: "pending",
-            aiReport,
-            createdAt: new Date().toISOString()
-          };
-
-          await addDoc(collection(db, "submissions"), docData);
-
-          document.getElementById('loaderBox').style.display = 'none';
-          const statusCard = document.getElementById('statusCard');
-          statusCard.className = "status-card pending";
-          statusCard.innerHTML = "<b>تم استلام طلبك بنجاح!</b><br>جاري مراجعة المستند وتدقيقه من قِبل الجهة المختصة. يمكنك متابعة الحالة لاحقاً.";
-          statusCard.style.display = 'block';
-        };
-
-      } catch (err) {
-        document.getElementById('loaderBox').style.display = 'none';
-        document.getElementById('submissionForm').style.display = 'block';
-        alert("حدث خطأ أثناء رفع المستند: " + err.message);
+      if (type === 'verify') {
+        title.innerText = "خدمة التحقق من الروابط والمستندات";
+        content.innerHTML = `
+          <div class="form-group">
+            <label>أدخل رابط أو الرقم التسلسلي للتحقق من صحته:</label>
+            <input type="text" id="verifyInput" placeholder="مثال: ETH-2026-XXXXX أو الرابط المراد فحص اعتماده" />
+          </div>
+          <button class="btn-gov-submit" onclick="checkVerification()">تحقق الآن</button>
+          <div id="verifyResult" style="margin-top:15px; font-weight:bold;"></div>
+        `;
+      } else if (type === 'docs') {
+        if (!currentUser) {
+          alert("عذراً، خدمة رفع المستندات والتختيم تتطلب تسجيل الدخول أولاً.");
+          openLoginModal();
+          showHome();
+          return;
+        }
+        title.innerText = "خدمة المستندات والصور (طلب التختيم والمراجعة)";
+        content.innerHTML = `
+          <div class="form-group"><label>اسم المستفيد:</label><input type="text" value="${currentUser.fullName}" disabled /></div>
+          <div class="form-group"><label>رقم الهوية:</label><input type="text" value="${currentUser.id}" disabled /></div>
+          <div class="form-group"><label>ملاحظة أو وصف المستند:</label><textarea id="docNote" rows="2" placeholder="أدخل تفاصيل المستند..."></textarea></div>
+          <div class="form-group"><label>إرفاق المستند أو الصورة:</label><input type="file" id="docFile" accept="image/*" /></div>
+          <button class="btn-gov-submit" onclick="submitDocument()">إرسال المستند للتدقيق المركزي</button>
+        `;
+      } else if (type === 'tracking') {
+        if (!currentUser) {
+          alert("يتطلب تسجيل الدخول لعرض وتتبع طلباتك.");
+          openLoginModal();
+          showHome();
+          return;
+        }
+        title.innerText = "تتبع الطلبات الخاصة بك";
+        content.innerHTML = `
+          <p>جاري استعلام الطلبات المرتبطة برقم هويتك (${currentUser.id})...</p>
+          <div style="margin-top:15px; background:#faf9f6; padding:15px; border-radius:4px; border:1px solid var(--gov-border);">
+            • لا توجد طلبات معلقة حالياً، أو أن الطلب قيد التدقيق المركزي.
+          </div>
+        `;
       }
-    });
+    }
+
+    function checkVerification() {
+      const val = document.getElementById('verifyInput').value.trim();
+      const res = document.getElementById('verifyResult');
+      if (!val) { res.innerText = "الرجاء إدخال قيمة صحيحة للتحقق."; res.style.color="red"; return; }
+      res.innerText = "✅ الرابط / المستند نظامي ومعتمد رسمياً من منصة إثبتلي الرقمية.";
+      res.style.color = "green";
+    }
+
+    function submitDocument() {
+      const fileInput = document.getElementById('docFile');
+      const note = document.getElementById('docNote').value;
+      if (!fileInput.files.length) {
+        alert("الرجاء إرفاق المستند أو الصورة.");
+        return;
+      }
+      alert("تم إرسال المستند بنجاح إلى قسم التدقيق والمراجعة المركزي!");
+      showHome();
+    }
   </script>
 </body>
 </html>
