@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>إثبتلي | لوحة المشروع</title>
+  <title>إثبتلي | البوابة الرئيسية</title>
   <style>
     :root { --brown:#3f5a3a; --cream:#eef2e6; --text:#2b1c12; --line:#d9c7b0; --danger:#b42318; }
     * { box-sizing: border-box; }
@@ -32,7 +32,7 @@
 </head>
 <body>
   <div class="topbar">
-    <span>مشروع جامعي</span>
+    <span>منصة تحقق </span>
     <span>لوحة المراجعة</span>
   </div>
   <div class="hero">
@@ -46,7 +46,7 @@
   </div>
   <div class="nav"><div class="nav-inner">الرئيسية | الطلبات | خروج</div></div>
   <div class="wrap">
-    <div class="notice">دخول المشرف بالإيميل فقط. الطلبات تعرض الاسم والرقم الجامعي والجوال والصورة.</div>
+    <div class="notice">دخول المشرف بالإيميل فقط .</div>
     <div id="authCard" class="card">
       <input id="email" type="email" placeholder="إيميل المشرف" />
       <input id="password" type="password" placeholder="كلمة المرور" />
@@ -61,7 +61,7 @@
   </div>
   <footer>
     <h3>نبذة</h3>
-    <div>منصة جامعية لمراجعة الملفات المرفقة وإرسال الرد للطالب.</div>
+    <div>منصة لمراجعة الادلة المرفقة وإرسال الرد .</div>
   </footer>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
@@ -117,7 +117,7 @@
           const x = d.data();
           list.innerHTML += `<div class="item"><img src="${x.imageUrl}" alt=""><div>
             <p><b>الاسم:</b> ${x.fullName || "-"}</p>
-            <p><b>الرقم الجامعي:</b> ${x.universityId || "-"}</p>
+            <p><b>الهوية الوطنية:</b> ${x.universityId || "-"}</p>
             <p><b>الجوال:</b> ${x.phone || "-"}</p>
             <p><b>الحالة:</b> ${x.status}</p>
             <p>${x.note || ""}</p>
