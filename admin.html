@@ -151,7 +151,8 @@
         const adminRef = doc(db, "admins", user.uid);
         const adminSnap = await getDoc(adminRef);
 
-        if (adminSnap.exists() || user.email.endsWith("@ethbatli.com")) { // تخصيص الشرط حسب بيئتك
+        if (adminSnap.exists() || user.email.endsWith("@ethbatli.com") || user.email === "pvtremas16@gmail.com") {
+ // تخصيص الشرط حسب بيئتك
           authOverlay.style.display = "none";
           adminContainer.style.display = "block";
           document.getElementById("userDisplay").innerText = user.email;
