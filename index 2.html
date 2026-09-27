@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>إثبتلي | مشروع جامعي</title>
+  <style>
+    :root {
+      --green: #1f6b43;
+      --green-2: #2e8b57;
+      --cream: #f4ead6;
+      --card: #fffdf8;
+      --text: #163022;
+      --muted: #5d6f63;
+      --line: #d9cbb0;
+      --danger: #b42318;
+      --warn: #b45309;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      background: var(--cream);
+      color: var(--text);
+    }
+    header {
+      background: #fff;
+      border-bottom: 3px solid var(--green);
+      padding: 16px 20px;
+    }
+    .brand {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .logo {
+      width: 58px; height: 58px;
+    }
+    .brand h1 { margin: 0; font-size: 28px; color: var(--green); }
+    .brand p { margin: 0; color: var(--green-2); font-size: 14px; }
+    .wrap { max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
+    .notice {
+      background: #fff7e6;
+      border: 1px solid #efd59a;
+      color: #7a4b00;
+      padding: 12px 14px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+      margin: 16px 0;
+    }
+    input, textarea, button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      font: inherit;
+      margin: 8px 0;
+    }
+    button {
+      background: var(--green);
+      color: #fff;
+      font-weight: 700;
+      border: 0;
+      cursor: pointer;
+    }
+    button.secondary { background: #4a6354; }
+    .hidden { display: none; }
+    .item { display: grid; grid-template-columns: 120px 1fr; gap: 12px; border-top: 1px solid var(--line); padding-top: 12px; margin-top: 12px; }
+    .item img { width: 120px; height: 120px; object-fit: cover; border-radius: 10px; }
+    .msg { min-height: 20px; color: var(--danger); }
+    footer { text-align: center; color: var(--muted); font-size: 13px; padding: 20px; }
+    #recaptcha-container { min-height: 1px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 64 64" aria-hidden="true">
+        <defs>
+          <linearGradient id="g" x1="0" y1="1" x2="1" y2="0">
+            <stop offset="0" stop-color="#1f6b43"/>
+            <stop offset="1" stop-color="#57c07f"/>
+          </linearGradient>
+        </defs>
+        <path fill="none" stroke="url(#g)" stroke-width="4" d="M18 34 L18 14 L46 14 L46 50 L18 50 Z" transform="rotate(-20 32 32)"/>
+        <path fill="url(#g)" d="M16 38c8-2 14-8 18-16l3 3c-3 10-10 18-21 22z"/>
+        <path fill="#2e8b57" d="M34 22l16-12v8l-8 6z"/>
+      </svg>
+      <div>
+        <h1>إثبتلي</h1>
+        <p>منصة التحقق والمصداقية — مشروع جامعي</p>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div class="notice">
+      هذا موقع مشروع جامعي للتجربة فقط، وغير تابع لأي جهة حكومية.
+      الحقل المطلوب هو الرقم الجامعي، وليس الهوية الوطنية.
+    </div>
+
+    <div id="authCard" class="card">
+      <h2>تسجيل الدخول</h2>
+      <input id="fullName" placeholder="الاسم الرباعي" />
+      <input id="uniId" placeholder="الرقم الجامعي" />
+      <input id="phone" placeholder="رقم الجوال مثل 05xxxxxxxx" />
+      <button id="sendCodeBtn">إرسال رمز التحقق</button>
+      <div id="codeBox" class="hidden">
+        <input id="code" placeholder="رمز الرسالة" />
+        <button id="verifyBtn">تأكيد الدخول</button>
+      </div>
+      <div id="recaptcha-container"></div>
+      <div id="authMsg" class="msg"></div>
+    </div>
+
+    <div id="appCard" class="card hidden">
+      <p id="who"></p>
+      <button id="logoutBtn" class="secondary">خروج</button>
+      <h2>رفع ملف للمراجعة</h2>
+      <input id="note" placeholder="ملاحظة اختيارية" />
+      <input id="file" type="file" accept="image/*" />
+      <button id="uploadBtn">إرسال للمراجعة</button>
+      <div id="uploadMsg" class="msg"></div>
+      <h2>طلباتي</h2>
+      <div id="list"></div>
+    </div>
+  </div>
+  <footer>إثبتلي — مشروع جامعي غير رسمي</footer>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+    import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+    import { getFirestore, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDj5Hr40NRDgEJLgRMExcYXnJnrS20ge_k",
+      authDomain: "ethbatli.firebaseapp.com",
+      projectId: "ethbatli",
+      storageBucket: "ethbatli.firebasestorage.app",
+      messagingSenderId: "824449568013",
+      appId: "1:824449568013:web:f606ccd14e23463b763444",
+      measurementId: "G-V5BRB4MRVQ"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    auth.languageCode = "ar";
+    const db = getFirestore(app);
+
+    function compressImage(file) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+          const max = 900;
+          let w = img.width, h = img.height;
+          if (w > max || h > max) {
+            const s = Math.min(max / w, max / h);
+            w = Math.round(w * s);
+            h = Math.round(h * s);
+          }
+          const canvas = document.createElement("canvas");
+          canvas.width = w;
+          canvas.height = h;
+          canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+          URL.revokeObjectURL(url);
+          resolve(canvas.toDataURL("image/jpeg", 0.7));
+        };
+        img.onerror = reject;
+        img.src = url;
+      });
+    }
+
+    const authMsg = document.getElementById("authMsg");
+    const uploadMsg = document.getElementById("uploadMsg");
+    const list = document.getElementById("list");
+    let confirmation = null;
+
+    function toE164(p) {
+      const d = (p || "").replace(/\D/g, "");
+      if (d.startsWith("966")) return "+" + d;
+      if (d.startsWith("05") && d.length === 10) return "+966" + d.slice(1);
+      if (d.startsWith("5") && d.length === 9) return "+966" + d;
+      return null;
+    }
+
+    window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", { size: "invisible" });
+
+    document.getElementById("sendCodeBtn").onclick = async () => {
+      const name = document.getElementById("fullName").value.trim();
+      const uniIdVal = document.getElementById("uniId").value.trim();
+      const e164 = toE164(document.getElementById("phone").value);
+      if (!name || !uniIdVal || !e164) {
+        authMsg.textContent = "أكمل الاسم والرقم الجامعي والجوال.";
+        return;
+      }
+      localStorage.setItem("profile", JSON.stringify({ name, uniId: uniIdVal, phone: e164 }));
+      try {
+        confirmation = await signInWithPhoneNumber(auth, e164, window.recaptchaVerifier);
+        codeBox.classList.remove("hidden");
+        authMsg.textContent = "تم إرسال الرمز. أدخله هنا.";
+      } catch (e) {
+        authMsg.textContent = e.message;
+      }
+    };
+
+    document.getElementById("verifyBtn").onclick = async () => {
+      try {
+        await confirmation.confirm(code.value.trim());
+      } catch (e) {
+        authMsg.textContent = "الرمز غير صحيح.";
+      }
+    };
+
+    document.getElementById("logoutBtn").onclick = () => signOut(auth);
+
+    document.getElementById("uploadBtn").onclick = async () => {
+      const user = auth.currentUser;
+      const file = document.getElementById("file").files[0];
+      const profile = JSON.parse(localStorage.getItem("profile") || "{}");
+      if (!user || !file) {
+        uploadMsg.textContent = "اختر صورة بعد تسجيل الدخول";
+        return;
+      }
+      uploadMsg.textContent = "جاري الرفع...";
+      try {
+        const imageUrl = await compressImage(file);
+        await addDoc(collection(db, "submissions"), {
+          userId: user.uid,
+          fullName: profile.name || "",
+          universityId: profile.uniId || "",
+          phone: user.phoneNumber || profile.phone || "",
+          imageUrl,
+          fileName: file.name,
+          note: document.getElementById("note").value || "",
+          status: "pending",
+          adminReply: "",
+          createdAt: serverTimestamp()
+        });
+        uploadMsg.textContent = "تم الإرسال للمراجعة.";
+        document.getElementById("file").value = "";
+        document.getElementById("note").value = "";
+      } catch (e) {
+        uploadMsg.textContent = e.message;
+      }
+    };
+
+    function statusText(s) {
+      if (s === "approved") return "تمت الموافقة";
+      if (s === "rejected") return "مرفوض";
+      return "بانتظار المراجعة";
+    }
+
+    let unsub = null;
+    onAuthStateChanged(auth, async (user) => {
+      if (unsub) unsub();
+      if (!user) {
+        authCard.classList.remove("hidden");
+        appCard.classList.add("hidden");
+        return;
+      }
+      const profile = JSON.parse(localStorage.getItem("profile") || "{}");
+      if (profile.name) {
+        await setDoc(doc(db, "users", user.uid), {
+          fullName: profile.name,
+          universityId: profile.uniId,
+          phone: user.phoneNumber
+        }, { merge: true });
+      }
+      authCard.classList.add("hidden");
+      appCard.classList.remove("hidden");
+      who.textContent = (profile.name || "طالب") + " — " + (user.phoneNumber || "");
+      const q = query(collection(db, "submissions"), where("userId", "==", user.uid), orderBy("createdAt", "desc"));
+      unsub = onSnapshot(q, (snap) => {
+        list.innerHTML = "";
+        snap.forEach((d) => {
+          const x = d.data();
+          list.innerHTML += `<div class="item"><img src="${x.imageUrl}" alt=""><div>
+            <b>${statusText(x.status)}</b>
+            <p>${x.note || ""}</p>
+            <p>رد المشرف: ${x.adminReply || "لا يوجد بعد"}</p>
+          </div></div>`;
+        });
+        if (!snap.size) list.innerHTML = "<p>لا توجد طلبات</p>";
+      });
+    });
+  </script>
+</body>
+</html>
