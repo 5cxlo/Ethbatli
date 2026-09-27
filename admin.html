@@ -3,86 +3,40 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>إثبتلي | البوابة الرئيسية</title>
+  <title>لوحة التحكم الفنية | منصة إثبتلي</title>
   <style>
-    :root { --brown:#3f5a3a; --cream:#eef2e6; --text:#2b1c12; --line:#d9c7b0; --danger:#b42318; }
-    * { box-sizing: border-box; }
-    body { margin:0; font-family:"Segoe UI", Tahoma, sans-serif; background:var(--cream); color:var(--text); }
-    .topbar { background:var(--brown); color:#f7efe4; font-size:13px; padding:8px 20px; display:flex; justify-content:space-between; }
-    .hero { background:#f7f1e6; padding:18px 20px; }
-    .hero-inner, .wrap, .nav-inner { max-width:980px; margin:0 auto; }
-    .hero-inner { display:flex; align-items:center; justify-content:space-between; gap:12px; }
-    .hero h1 { margin:0; color:var(--brown); }
-    .hero p { margin:4px 0 0; color:#8a6240; }
-    .nav { background:var(--brown); }
-    .nav-inner { padding:10px 20px; color:#fff; }
-    .wrap { padding:24px 16px 40px; }
-    .card { background:#fffaf2; border:1px solid var(--line); padding:18px; margin:16px 0; }
-    input, textarea, button { width:100%; padding:12px; border:1px solid var(--line); font:inherit; margin:8px 0; }
-    button { background:var(--brown); color:#fff; border:0; font-weight:700; cursor:pointer; }
-    button.danger { background:var(--danger); }
-    button.secondary { background:#8a6240; color:#fff; }
-    .item { display:grid; grid-template-columns:180px 1fr; gap:14px; border-top:1px solid var(--line); padding-top:14px; margin-top:14px; }
-    .item img { width:180px; height:180px; object-fit:cover; }
-    .hidden { display:none; }
-    .notice { background:#f4e6cf; border:1px solid #e2c9a4; padding:12px; }
-    footer { background:var(--brown); color:#ead9c4; padding:18px 16px; }
-    footer h3 { color:#fff; margin:0 0 8px; }
-
-    /* معاينة الختم في لوحة الأدمن */
-    .admin-doc-wrap { position: relative; width: 180px; height: 180px; }
-    .stamp-overlay {
-      position: absolute;
-      top: -10px;
-      left: -10px;
-      width: 85px;
-      height: 85px;
-      background-image: url('logo.png');
-      background-size: contain;
-      background-repeat: no-repeat;
-      pointer-events: none;
+    :root {
+      --primary-green: #1c422b;
+      --card-bg: #ffffff;
+      --border-color: #e2dcd0;
+      --danger: #b42318;
+      --success: #15803d;
     }
+    body { font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f2ec; padding: 20px; direction: rtl; }
+    .container { max-width: 1000px; margin: 0 auto; }
+    .header { background: var(--primary-green); color: #fff; padding: 18px 24px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+    .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+    .doc-img { max-width: 100%; max-height: 400px; border: 1px solid var(--border-color); border-radius: 6px; margin-top: 10px; }
+    textarea { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-family: inherit; margin-top: 8px; }
+    .btn-group { display: flex; gap: 10px; margin-top: 12px; }
+    button { padding: 10px 18px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-family: inherit; }
+    .btn-approve { background: var(--success); color: white; }
+    .btn-reject { background: var(--danger); color: white; }
   </style>
 </head>
 <body>
-  <div class="topbar">
-    <span>منصة تحقق </span>
-    <span>لوحة المراجعة الرقمية للمستندات</span>
-  </div>
-  <div class="hero">
-    <div class="hero-inner">
-      <div>
-        <h1>إثبتلي</h1>
-        <p>لوحة مراجعة المستندات واعتماد ختم المصادقة</p>
-      </div>
-      <img src="logo.png" alt="إثبتلي" style="height:58px;">
+  <div class="container">
+    <div class="header">
+      <h2>لوحة الفحص والمصادقة الفنية - إثبتلي</h2>
+      <span>المشرف الفني</span>
     </div>
+    <div id="submissionsList">جاري تحميل المستندات بانتظار التوثيق...</div>
   </div>
-  <div class="nav"><div class="nav-inner">الرئيسية | الطلبات | خروج</div></div>
-  <div class="wrap">
-    <div class="notice">دخول المشرف بالإيميل فقط .</div>
-    <div id="authCard" class="card">
-      <input id="email" type="email" placeholder="إيميل المشرف" />
-      <input id="password" type="password" placeholder="كلمة المرور" />
-      <button id="loginBtn">دخول</button>
-      <div id="authMsg" style="color:#b42318;"></div>
-    </div>
-    <div id="appCard" class="card hidden">
-      <p id="who"></p>
-      <button id="logoutBtn" class="secondary">خروج</button>
-      <div id="list"></div>
-    </div>
-  </div>
-  <footer>
-    <h3>نبذة</h3>
-    <div>منصة لمراجعة الأوراق والمستندات المرفقة، مطابقتها وإصدار ختم المصادقة الرقمية.</div>
-  </footer>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
-    import { getFirestore, collection, query, orderBy, onSnapshot, doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+    import { getFirestore, collection, query, orderBy, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
-    const ADMIN_EMAIL = "pvtremas16@gmail.com";
     const firebaseConfig = {
       apiKey: "AIzaSyDj5Hr4ONRDgEJLgRMExcYXnJnrS20ge_k",
       authDomain: "ethbatli.firebaseapp.com",
@@ -92,74 +46,59 @@
       appId: "1:824449568013:web:f606ccd14e23463b763444",
       measurementId: "G-V5BRB4MRVQ"
     };
+
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
     const db = getFirestore(app);
 
-    document.getElementById("loginBtn").onclick = async () => {
-      try { await signInWithEmailAndPassword(auth, email.value, password.value); }
-      catch (e) { authMsg.textContent = e.message; }
-    };
-    document.getElementById("logoutBtn").onclick = () => signOut(auth);
-
-    async function review(id, status) {
-      const reply = document.getElementById("reply-" + id).value;
-      let defaultMsg = "";
-      if (status === "approved") {
-        defaultMsg = "تمت مراجعة المستند بنجاح وتم إصدار (ختم المصادقة الرقمية).";
-      } else {
-        defaultMsg = "تم رفض المستند للشك في صحته أو عدم اكتمال البيانات.";
-      }
-
-      await updateDoc(doc(db, "submissions", id), {
-        status: status,
-        adminReply: reply || defaultMsg,
-        reviewedAt: serverTimestamp()
-      });
+    function generateSerialNumber() {
+      const randomHex = Math.floor(100000 + Math.random() * 900000).toString(16).toUpperCase();
+      return `ETH-2026-${randomHex}`;
     }
-    window.review = review;
 
-    let unsub = null;
-    onAuthStateChanged(auth, (user) => {
-      if (unsub) unsub();
-      if (!user || user.email !== ADMIN_EMAIL) {
-        authCard.classList.remove("hidden");
-        appCard.classList.add("hidden");
-        if (user && user.email !== ADMIN_EMAIL) authMsg.textContent = "هذا ليس حساب المشرف";
-        return;
-      }
-      authCard.classList.add("hidden");
-      appCard.classList.remove("hidden");
-      who.textContent = "مشرف: " + user.email;
-      const q = query(collection(db, "submissions"), orderBy("createdAt", "desc"));
-      unsub = onSnapshot(q, (snap) => {
-        list.innerHTML = "";
-        snap.forEach((d) => {
-          const x = d.data();
-          const isApproved = x.status === "approved";
+    const q = query(collection(db, "submissions"), orderBy("createdAt", "desc"));
+    onSnapshot(q, (snap) => {
+      const container = document.getElementById("submissionsList");
+      container.innerHTML = "";
+      snap.forEach((d) => {
+        const x = d.data();
+        const id = d.id;
 
-          list.innerHTML += `<div class="item">
-            <div class="admin-doc-wrap">
-              <a href="${x.imageUrl}" target="_blank">
-                <img src="${x.imageUrl}" alt="صورة المستند">
-              </a>
-              ${isApproved ? '<div class="stamp-overlay" title="ختم المصادقة موثق"></div>' : ''}
+        container.innerHTML += `
+          <div class="card">
+            <h3>مستند مقدم من: ${x.fullName || "غير محدد"} (${x.phone || "-"})</h3>
+            <p><b>رقم الهوية/الإقامة:</b> ${x.universityId || "-"}</p>
+            <p><b>ملاحظة الطالب:</b> ${x.note || "-"}</p>
+            <p><b>الحالة الحالية:</b> ${x.status}</p>
+            ${x.serialNumber ? `<p><b>الرقم التسلسلي الصادر:</b> ${x.serialNumber}</p>` : ''}
+            <img class="doc-img" src="${x.imageUrl}" />
+            
+            <textarea id="reply_${id}" placeholder="اكتب الملاحظة أو سبب القرار الفني...">${x.adminReply || ""}</textarea>
+            
+            <div class="btn-group">
+              <button class="btn-approve" onclick="updateStatus('${id}', 'approved')">اعتماد وإصدار الرقم التسلسلي ✅</button>
+              <button class="btn-reject" onclick="updateStatus('${id}', 'rejected')">رفض المستند ❌</button>
             </div>
-            <div>
-              <p><b>الاسم:</b> ${x.fullName || "-"}</p>
-              <p><b>رقم الهوية / الرقم الجامعي:</b> ${x.universityId || "-"}</p>
-              <p><b>الجوال:</b> ${x.phone || "-"}</p>
-              <p><b>حالة المستند:</b> ${x.status === "approved" ? "تمت المصادقة بالختم" : (x.status === "rejected" ? "مرفوض" : "بانتظار الفحص")}</p>
-              <p><b>ملاحظة المرفق:</b> ${x.note || "-"}</p>
-              <textarea id="reply-${d.id}" placeholder="اكتب الرد أو اتركه فارغاً للرد التلقائي">${x.adminReply || ""}</textarea>
-              <button onclick="review('${d.id}','approved')">موافقة وإصدار (ختم المصادقة)</button>
-              <button class="danger" onclick="review('${d.id}','rejected')">رفض المستند</button>
-            </div>
-          </div>`;
-        });
-        if (!snap.size) list.innerHTML = "<p>لا توجد طلبات</p>";
+          </div>
+        `;
       });
+      if(!snap.size) container.innerHTML = "لا توجد مستندات بانتظار الفحص.";
     });
+
+    window.updateStatus = async (id, status) => {
+      const reply = document.getElementById(`reply_${id}`).value;
+      const ref = doc(db, "submissions", id);
+      const updateData = {
+        status: status,
+        adminReply: reply
+      };
+
+      if (status === "approved") {
+        updateData.serialNumber = generateSerialNumber();
+      }
+
+      await updateDoc(ref, updateData);
+      alert("تم تحديث حالة المستند وإصدار التوثيق بنجاح!");
+    };
   </script>
 </body>
 </html>
