@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>قسم التدقيق والمصادقة الفنية | منصة إثبتلي</title>
+  <title>قسم التدقيق والمصادقة الفنية | منصة إثبتلي الرقمية</title>
   <style>
     :root {
       --primary-green: #1c422b;
@@ -70,21 +70,96 @@
     .pagination-container { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
     .pagination-btn { background: var(--primary-green); color: white; padding: 8px 16px; border-radius: 4px; }
 
-    #authOverlay { max-width: 400px; margin: 80px auto; padding: 30px; background: white; border-radius: 8px; border: 1px solid var(--border-color); text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    #authOverlay input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid var(--border-color); border-radius: 4px; }
-    #authOverlay button { width: 100%; background: var(--primary-green); color: white; padding: 10px; }
+    /* شاشة تسجيل الدخول بتصميم رسمي حكومي صارم */
+    #authOverlay { 
+      max-width: 450px; 
+      margin: 60px auto; 
+      padding: 40px 30px; 
+      background: #ffffff; 
+      border-radius: 12px; 
+      border: 1px solid var(--border-color); 
+      text-align: center; 
+      box-shadow: 0 10px 30px rgba(28, 66, 43, 0.08);
+      border-top: 6px solid var(--primary-green);
+    }
+    .auth-logo-text {
+      color: var(--primary-green);
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 5px;
+    }
+    .auth-subtitle {
+      color: var(--gold-accent);
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 25px;
+      letter-spacing: 0.5px;
+    }
+    .form-group-official {
+      text-align: right;
+      margin-bottom: 15px;
+    }
+    .form-group-official label {
+      display: block;
+      font-size: 13px;
+      font-weight: bold;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+    #authOverlay input { 
+      width: 100%; 
+      padding: 12px; 
+      border: 1px solid var(--border-color); 
+      border-radius: 6px; 
+      font-size: 14px;
+      background: #faf9f6;
+      transition: all 0.3s;
+    }
+    #authOverlay input:focus {
+      border-color: var(--primary-green);
+      background: #fff;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(28,66,43,0.1);
+    }
+    #authOverlay button { 
+      width: 100%; 
+      background: var(--primary-green); 
+      color: white; 
+      padding: 12px; 
+      border-radius: 6px; 
+      font-size: 15px;
+      font-weight: bold;
+      margin-top: 10px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    #authOverlay button:hover {
+      background: var(--accent-green);
+    }
   </style>
 </head>
 <body>
 
+  <!-- شاشة تسجيل الدخول الرسمية -->
   <div id="authOverlay">
-    <h3 style="color: var(--primary-green); margin-bottom: 15px;">تسجيل دخول قسم التدقيق</h3>
-    <input type="email" id="adminEmail" placeholder="البريد الإلكتروني للإدارة" />
-    <input type="password" id="adminPass" placeholder="كلمة المرور" />
-    <button id="btnLogin">تسجيل الدخول</button>
-    <p id="authError" style="color: var(--danger); font-size: 12px; margin-top: 10px; display: none;"></p>
+    <div class="auth-logo-text">منصة إثبتلي الرقمية</div>
+    <div class="auth-subtitle">بوابة التدقيق والمصادقة الفنية الرسمية</div>
+    
+    <div class="form-group-official">
+      <label>البريد الإلكتروني للإدارة</label>
+      <input type="email" id="adminEmail" placeholder="name@ethbatli.gov.sa" />
+    </div>
+    
+    <div class="form-group-official">
+      <label>كلمة المرور المشفرة</label>
+      <input type="password" id="adminPass" placeholder="••••••••••••" />
+    </div>
+
+    <button id="btnLogin">دخول للنظام الإداري</button>
+    <p id="authError" style="color: var(--danger); font-size: 13px; margin-top: 15px; display: none;"></p>
   </div>
 
+  <!-- لوحة الأدمن الرئيسية -->
   <div class="admin-container" id="adminContainer">
     <div class="admin-header">
       <div>
@@ -140,14 +215,12 @@
       const adminContainer = document.getElementById("adminContainer");
 
       if (user) {
-        // استثناء مباشر وآمن لإيميلك أو أي إيميل مصرح
         if (user.email === "pvtremas16@gmail.com" || user.email.endsWith("@ethbatli.com")) {
           authOverlay.style.display = "none";
           adminContainer.style.display = "block";
           document.getElementById("userDisplay").innerText = user.email;
           loadSubmissions();
         } else {
-          // فحص جدول الـ admins كخيار إضافي
           try {
             const adminRef = doc(db, "admins", user.uid);
             const adminSnap = await getDoc(adminRef);
@@ -184,7 +257,6 @@
       try {
         await signInWithEmailAndPassword(auth, email, pass);
       } catch (err) {
-        console.error("Login error code:", err.code, err.message);
         let msg = "فشل تسجيل الدخول: البريد أو كلمة المرور غير صحيحة";
         if (err.code === 'auth/invalid-email') msg = "صيغة البريد الإلكتروني غير صحيحة";
         if (err.code === 'auth/user-not-found') msg = "هذا البريد غير مسجل في النظام";
