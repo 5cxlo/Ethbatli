@@ -24,7 +24,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-beige); color: var(--text-main); line-height: 1.6; padding: 20px; }
 
-    .admin-container { max-width: 1050px; margin: 0 auto; }
+    .admin-container { max-width: 1050px; margin: 0 auto; display: none; } /* مخفي لحين التحقق من تسجيل الدخول */
     
     .admin-header {
       background: var(--primary-green); color: #fff; padding: 20px 24px; border-radius: 8px; margin-bottom: 24px;
@@ -32,7 +32,8 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     }
     .admin-header h2 { font-size: 20px; font-weight: 700; margin: 0; }
-    .admin-header span { font-size: 13px; color: var(--gold-accent); font-weight: 600; }
+    .admin-header-info { display: flex; align-items: center; gap: 15px; }
+    .btn-logout { background: #b42318; color: #fff; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
 
     .doc-card {
       background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 22px; margin-bottom: 20px;
@@ -57,6 +58,7 @@
     .btn-group { display: flex; gap: 10px; }
     button { padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 700; font-family: inherit; font-size: 13px; transition: opacity 0.2s; }
     button:hover { opacity: 0.9; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-approve { background: var(--success); color: white; flex: 1; }
     .btn-reject { background: var(--danger); color: white; flex: 1; }
 
@@ -64,25 +66,54 @@
     .status-pending { background: #fef3c7; color: #92400e; }
     .status-approved { background: #dcfce7; color: #166534; }
     .status-rejected { background: #fee2e2; color: #991b1b; }
+
+    /* التحكم بالتصفح Pagination */
+    .pagination-container { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
+    .pagination-btn { background: var(--primary-green); color: white; padding: 8px 16px; border-radius: 4px; }
+
+    /* شاشة تسجيل الدخول */
+    #authOverlay { max-width: 400px; margin: 80px auto; padding: 30px; background: white; border-radius: 8px; border: 1px solid var(--border-color); text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    #authOverlay input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid var(--border-color); border-radius: 4px; }
+    #authOverlay button { width: 100%; background: var(--primary-green); color: white; padding: 10px; }
   </style>
 </head>
 <body>
 
-  <div class="admin-container">
+  <!-- شاشة تسجيل الدخول لمنع الوصول غير المصرح به -->
+  <div id="authOverlay">
+    <h3 style="color: var(--primary-green); margin-bottom: 15px;">تسجيل دخول قسم التدقيق</h3>
+    <input type="email" id="adminEmail" placeholder="البريد الإلكتروني للإدارة" />
+    <input type="password" id="adminPass" placeholder="كلمة المرور" />
+    <button id="btnLogin">تسجيل الدخول</button>
+    <p id="authError" style="color: var(--danger); font-size: 12px; margin-top: 10px; display: none;"></p>
+  </div>
+
+  <!-- لوحة الأدمن الرئيسية -->
+  <div class="admin-container" id="adminContainer">
     <div class="admin-header">
       <div>
         <h2>لوحة قسم التدقيق والمصادقة الفنية</h2>
         <p style="font-size: 12px; color: #d4e5d8; margin-top: 4px;">مراجعة تقارير الذكاء الاصطناعي واعتماد المستندات الرسمية</p>
       </div>
-      <span>المراجع الفني المختص</span>
+      <div class="admin-header-info">
+        <span id="userDisplay" style="font-size: 12px; color: var(--gold-accent);"></span>
+        <button class="btn-logout" id="btnLogout">خروج</button>
+      </div>
     </div>
 
     <div id="submissionsList">جاري تحميل طلبات المستندات المرفوعة...</div>
+
+    <!-- أزرار التصفح (Pagination) -->
+    <div class="pagination-container">
+      <button id="btnPrevPage" class="pagination-btn" style="display:none;">السابق</button>
+      <button id="btnNextPage" class="pagination-btn" style="display:none;">التالي</button>
+    </div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-    import { getFirestore, collection, query, orderBy, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+    import { getFirestore, collection, query, orderBy, limit, startAfter, getDocs, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDj5Hr4ONRDgEJLgRMExcYXnJnrS20ge_k",
@@ -95,17 +126,100 @@
     };
 
     const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // دالة توليد الرقم التسلسلي الموحد لتوثيق المستند
-    function generateSerialNumber() {
-      const randomHex = Math.floor(100000 + Math.random() * 900000).toString(16).toUpperCase();
-      return `ETH-2026-${randomHex}`;
+    const PAGE_SIZE = 10;
+    let lastVisibleDoc = null;
+    let firstVisibleDoc = null;
+
+    // توليد رقم تسلسلي آمن مشفر في جانب العميل
+    function generateSecureSerialNumber() {
+      const array = new Uint32Array(1);
+      window.crypto.getRandomValues(array);
+      const hex = (array[0] % 900000 + 100000).toString(16).toUpperCase();
+      return `ETH-2026-${hex}`;
     }
 
-    const q = query(collection(db, "submissions"), orderBy("createdAt", "desc"));
-    
-    onSnapshot(q, (snap) => {
+    // التحقق من حالة تسجيل الدخول والصلاحيات
+    onAuthStateChanged(auth, async (user) => {
+      const authOverlay = document.getElementById("authOverlay");
+      const adminContainer = document.getElementById("adminContainer");
+
+      if (user) {
+        // التحقق مما إذا كان المستخدم أدمن مصرح له في Firestore
+        const adminRef = doc(db, "admins", user.uid);
+        const adminSnap = await getDoc(adminRef);
+
+        if (adminSnap.exists() || user.email.endsWith("@ethbatli.com")) { // تخصيص الشرط حسب بيئتك
+          authOverlay.style.display = "none";
+          adminContainer.style.display = "block";
+          document.getElementById("userDisplay").innerText = user.email;
+          loadSubmissions();
+        } else {
+          showAuthError("حسابك لا يملك صلاحيات التدقيق الإداري.");
+          signOut(auth);
+        }
+      } else {
+        authOverlay.style.display = "block";
+        adminContainer.style.display = "none";
+      }
+    });
+
+    // تسجيل الدخول
+    document.getElementById("btnLogin").addEventListener("click", async () => {
+      const email = document.getElementById("adminEmail").value;
+      const pass = document.getElementById("adminPass").value;
+      try {
+        await signInWithEmailAndPassword(auth, email, pass);
+      } catch (err) {
+        showAuthError("فشل تسجيل الدخول: البريد أو كلمة المرور غير صحيحة");
+      }
+    });
+
+    // تسجيل الخروج
+    document.getElementById("btnLogout").addEventListener("click", () => signOut(auth));
+
+    function showAuthError(msg) {
+      const err = document.getElementById("authError");
+      err.innerText = msg;
+      err.style.display = "block";
+    }
+
+    // جلب المستندات مقسمة (Pagination)
+    async function loadSubmissions(startDoc = null) {
+      const container = document.getElementById("submissionsList");
+      container.innerHTML = "جاري التحميل...";
+
+      let q = query(
+        collection(db, "submissions"),
+        orderBy("createdAt", "desc"),
+        limit(PAGE_SIZE)
+      );
+
+      if (startDoc) {
+        q = query(
+          collection(db, "submissions"),
+          orderBy("createdAt", "desc"),
+          startAfter(startDoc),
+          limit(PAGE_SIZE)
+        );
+      }
+
+      const snap = await getDocs(q);
+      if (snap.empty) {
+        container.innerHTML = "<div style='text-align:center; padding:40px; background:#fff;'>لا توجد مستندات إضافية.</div>";
+        return;
+      }
+
+      lastVisibleDoc = snap.docs[snap.docs.length - 1];
+      firstVisibleDoc = snap.docs[0];
+
+      renderDocs(snap);
+    }
+
+    // عرض المستندات بطريقة فعالة دون إعادة الاستهلاك الشديد للـ DOM
+    function renderDocs(snap) {
       const container = document.getElementById("submissionsList");
       container.innerHTML = "";
 
@@ -120,77 +234,98 @@
         let statusClass = isPending ? "status-pending" : (isApproved ? "status-approved" : "status-rejected");
         let statusLabel = isPending ? "قيد التدقيق والمراجعة" : (isApproved ? "مصادق ومعتمد ✅" : "مرفوض ❌");
 
-        const hasTampering = x.aiReport && x.aiReport.tamperStatus.includes("⚠️");
+        const hasTampering = x.aiReport && x.aiReport.tamperStatus && x.aiReport.tamperStatus.includes("⚠️");
 
-        container.innerHTML += `
-          <div class="doc-card">
-            <div class="doc-info-section">
-              <h3>مستند مقدم من: ${x.fullName || "مستخدم"}</h3>
-              <p><b>رقم الجوال:</b> ${x.phone || "-"}</p>
-              <p><b>رقم الهوية / الجامعي:</b> ${x.universityId || "-"}</p>
-              <p><b>الحالة:</b> <span class="status-badge ${statusClass}">${statusLabel}</span></p>
-              
-              ${x.serialNumber ? `<p style="margin-top:4px;"><b>الرقم التسلسلي الصادر:</b> <span style="color:var(--primary-green); font-weight:bold;">${x.serialNumber}</span></p>` : ''}
+        const card = document.createElement("div");
+        card.className = "doc-card";
+        card.innerHTML = `
+          <div class="doc-info-section">
+            <h3>مستند مقدم من: ${x.fullName || "مستخدم"}</h3>
+            <p><b>رقم الجوال:</b> ${x.phone || "-"}</p>
+            <p><b>رقم الهوية / الجامعي:</b> ${x.universityId || "-"}</p>
+            <p><b>الحالة:</b> <span class="status-badge ${statusClass}">${statusLabel}</span></p>
+            
+            ${x.serialNumber ? `<p style="margin-top:4px;"><b>الرقم التسلسلي الصادر:</b> <span style="color:var(--primary-green); font-weight:bold;">${x.serialNumber}</span></p>` : ''}
 
-              <!-- قسم تقرير فحص الذكاء الاصطناعي -->
-              ${x.aiReport ? `
-                <div class="ai-box ${hasTampering ? 'warning' : ''}">
-                  <div class="ai-box-title">
-                    🤖 تقرير الفحص الآلي بالذكاء الاصطناعي (AI Check)
-                  </div>
-                  • نسبة وضوح الجودة: <b>${x.aiReport.score}</b><br/>
-                  • فحص التعديل والقص: <b>${x.aiReport.tamperStatus}</b><br/>
-                  • تقييم مصدر المستند: <b>${x.aiReport.isAiGenerated}</b>
-                </div>
-              ` : ''}
-
-              <p><b>وصف/ملاحظة المستخدم:</b> ${x.note || "-"}</p>
-
-              <label style="font-size:12px; font-weight:bold; color:var(--text-muted); display:block; margin-top:10px;">قرار وتوجيه قسم التدقيق:</label>
-              <textarea id="reply_${id}" rows="2" placeholder="اكتب الملاحظة الفنية أو سبب القرار...">${x.adminReply || ""}</textarea>
-              
-              <div class="btn-group">
-                <button class="btn-approve" onclick="updateStatus('${id}', 'approved')">اعتماد وإصدار الرقم التسلسلي ✅</button>
-                <button class="btn-reject" onclick="updateStatus('${id}', 'rejected')">رفض المستند ❌</button>
+            ${x.aiReport ? `
+              <div class="ai-box ${hasTampering ? 'warning' : ''}">
+                <div class="ai-box-title">🤖 تقرير الفحص الآلي بالذكاء الاصطناعي (AI Check)</div>
+                • نسبة وضوح الجودة: <b>${x.aiReport.score || '-'}</b><br/>
+                • فحص التعديل والقص: <b>${x.aiReport.tamperStatus || '-'}</b><br/>
+                • تقييم مصدر المستند: <b>${x.aiReport.isAiGenerated || '-'}</b>
               </div>
-            </div>
+            ` : ''}
 
-            <div class="doc-preview-container">
-              <span style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:6px;">معاينة الوثيقة المرفوعة</span>
-              <a href="${x.imageUrl}" target="_blank">
-                <img src="${x.imageUrl}" alt="المستند" />
-              </a>
+            <p><b>وصف/ملاحظة المستخدم:</b> ${x.note || "-"}</p>
+
+            <label style="font-size:12px; font-weight:bold; color:var(--text-muted); display:block; margin-top:10px;">قرار وتوجيه قسم التدقيق:</label>
+            <textarea id="reply_${id}" rows="2" placeholder="اكتب الملاحظة الفنية أو سبب القرار..." ${!isPending ? 'disabled' : ''}>${x.adminReply || ""}</textarea>
+            
+            <div class="btn-group">
+              <button class="btn-approve" id="btn_app_${id}" ${!isPending ? 'disabled' : ''}>اعتماد وإصدار الرقم التسلسلي ✅</button>
+              <button class="btn-reject" id="btn_rej_${id}" ${!isPending ? 'disabled' : ''}>رفض المستند ❌</button>
             </div>
           </div>
+
+          <div class="doc-preview-container">
+            <span style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:6px;">معاينة الوثيقة المرفوعة</span>
+            <a href="${x.imageUrl}" target="_blank" rel="noopener noreferrer">
+              <img src="${x.imageUrl}" alt="المستند" />
+            </a>
+          </div>
         `;
+
+        container.appendChild(card);
+
+        // إضافة أحداث الأزرار مع التأكيد وحظر التكرار
+        if (isPending) {
+          card.querySelector(`#btn_app_${id}`).addEventListener('click', () => handleDecision(id, 'approved'));
+          card.querySelector(`#btn_rej_${id}`).addEventListener('click', () => handleDecision(id, 'rejected'));
+        }
       });
+    }
 
-      if (!snap.size) {
-        container.innerHTML = "<div style='text-align:center; padding:40px; background:#fff; border-radius:8px; border:1px solid var(--border-color); color:var(--text-muted);'>لا توجد مستندات بانتظار الفحص والتدقيق حالياً.</div>";
-      }
-    });
-
-    window.updateStatus = async (id, status) => {
-      const reply = document.getElementById(`reply_${id}`).value;
-      const ref = doc(db, "submissions", id);
+    // دالة معالجة القرارات بمانع تكرار وتأكيد
+    async function handleDecision(id, status) {
+      const isApprove = status === 'approved';
+      const actionText = isApprove ? "اعتماد هذا المستند وإصدار رقم تسلسلي رسمي؟" : "رفض هذا المستند؟";
       
+      if (!confirm(`هل أنت تأكد من رغبتك في ${actionText}`)) return;
+
+      const btnApprove = document.getElementById(`btn_app_${id}`);
+      const btnReject = document.getElementById(`btn_rej_${id}`);
+      const reply = document.getElementById(`reply_${id}`).value;
+
+      // تعطيل الأزرار أثناء معالجة الطلب
+      btnApprove.disabled = true;
+      btnReject.disabled = true;
+
+      const ref = doc(db, "submissions", id);
       const updateData = {
         status: status,
-        adminReply: reply
+        adminReply: reply,
+        updatedAt: new Date().toISOString()
       };
 
-      // إذا تم الاعتماد، يتم إنشاء رقم تسلسلي موحد ورسمي
-      if (status === "approved") {
-        updateData.serialNumber = generateSerialNumber();
+      if (isApprove) {
+        updateData.serialNumber = generateSecureSerialNumber();
       }
 
       try {
         await updateDoc(ref, updateData);
-        alert(status === "approved" ? "تم اعتماد المستند وإصدار الرقم التسلسلي بنجاح!" : "تم تسجيل رفض المستند.");
+        alert(isApprove ? "تم اعتماد المستند بنجاح!" : "تم تسجيل رفض المستند.");
+        loadSubmissions(); // إعادة تحميل الصفحة لتسجيل التغييرات
       } catch (e) {
         alert("حدث خطأ أثناء حفظ القرار: " + e.message);
+        btnApprove.disabled = false;
+        btnReject.disabled = false;
       }
-    };
+    }
+
+    // التنقل بين الصفحات
+    document.getElementById("btnNextPage").addEventListener("click", () => {
+      if (lastVisibleDoc) loadSubmissions(lastVisibleDoc);
+    });
   </script>
 </body>
 </html>
