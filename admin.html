@@ -24,7 +24,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-beige); color: var(--text-main); line-height: 1.6; padding: 20px; }
 
-    .admin-container { max-width: 1050px; margin: 0 auto; display: none; } /* مخفي لحين التحقق من تسجيل الدخول */
+    .admin-container { max-width: 1050px; margin: 0 auto; display: none; }
     
     .admin-header {
       background: var(--primary-green); color: #fff; padding: 20px 24px; border-radius: 8px; margin-bottom: 24px;
@@ -67,11 +67,9 @@
     .status-approved { background: #dcfce7; color: #166534; }
     .status-rejected { background: #fee2e2; color: #991b1b; }
 
-    /* التحكم بالتصفح Pagination */
     .pagination-container { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
     .pagination-btn { background: var(--primary-green); color: white; padding: 8px 16px; border-radius: 4px; }
 
-    /* شاشة تسجيل الدخول */
     #authOverlay { max-width: 400px; margin: 80px auto; padding: 30px; background: white; border-radius: 8px; border: 1px solid var(--border-color); text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
     #authOverlay input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid var(--border-color); border-radius: 4px; }
     #authOverlay button { width: 100%; background: var(--primary-green); color: white; padding: 10px; }
@@ -79,7 +77,6 @@
 </head>
 <body>
 
-  <!-- شاشة تسجيل الدخول لمنع الوصول غير المصرح به -->
   <div id="authOverlay">
     <h3 style="color: var(--primary-green); margin-bottom: 15px;">تسجيل دخول قسم التدقيق</h3>
     <input type="email" id="adminEmail" placeholder="البريد الإلكتروني للإدارة" />
@@ -88,7 +85,6 @@
     <p id="authError" style="color: var(--danger); font-size: 12px; margin-top: 10px; display: none;"></p>
   </div>
 
-  <!-- لوحة الأدمن الرئيسية -->
   <div class="admin-container" id="adminContainer">
     <div class="admin-header">
       <div>
@@ -103,7 +99,6 @@
 
     <div id="submissionsList">جاري تحميل طلبات المستندات المرفوعة...</div>
 
-    <!-- أزرار التصفح (Pagination) -->
     <div class="pagination-container">
       <button id="btnPrevPage" class="pagination-btn" style="display:none;">السابق</button>
       <button id="btnNextPage" class="pagination-btn" style="display:none;">التالي</button>
@@ -133,7 +128,6 @@
     let lastVisibleDoc = null;
     let firstVisibleDoc = null;
 
-    // توليد رقم تسلسلي آمن مشفر في جانب العميل
     function generateSecureSerialNumber() {
       const array = new Uint32Array(1);
       window.crypto.getRandomValues(array);
@@ -141,23 +135,32 @@
       return `ETH-2026-${hex}`;
     }
 
-    // التحقق من حالة تسجيل الدخول والصلاحيات
     onAuthStateChanged(auth, async (user) => {
       const authOverlay = document.getElementById("authOverlay");
       const adminContainer = document.getElementById("adminContainer");
 
       if (user) {
-        // التحقق مما إذا كان المستخدم أدمن مصرح له في Firestore
-        const adminRef = doc(db, "admins", user.uid);
-        const adminSnap = await getDoc(adminRef);
-
-        if (adminSnap.exists() || user.email.endsWith("@ethbatli.com") || user.email === "pvtremas16@gmail.com") {
- // تخصيص الشرط حسب بيئتك
+        // استثناء مباشر وآمن لإيميلك أو أي إيميل مصرح
+        if (user.email === "pvtremas16@gmail.com" || user.email.endsWith("@ethbatli.com")) {
           authOverlay.style.display = "none";
           adminContainer.style.display = "block";
           document.getElementById("userDisplay").innerText = user.email;
           loadSubmissions();
         } else {
+          // فحص جدول الـ admins كخيار إضافي
+          try {
+            const adminRef = doc(db, "admins", user.uid);
+            const adminSnap = await getDoc(adminRef);
+            if (adminSnap.exists()) {
+              authOverlay.style.display = "none";
+              adminContainer.style.display = "block";
+              document.getElementById("userDisplay").innerText = user.email;
+              loadSubmissions();
+              return;
+            }
+          } catch(e) {
+            console.log("Admin check error:", e);
+          }
           showAuthError("حسابك لا يملك صلاحيات التدقيق الإداري.");
           signOut(auth);
         }
@@ -167,18 +170,30 @@
       }
     });
 
-    // تسجيل الدخول
     document.getElementById("btnLogin").addEventListener("click", async () => {
-      const email = document.getElementById("adminEmail").value;
+      const email = document.getElementById("adminEmail").value.trim();
       const pass = document.getElementById("adminPass").value;
+      const errEl = document.getElementById("authError");
+      errEl.style.display = "none";
+
+      if (!email || !pass) {
+        showAuthError("الرجاء إدخال البريد الإلكتروني وكلمة المرور");
+        return;
+      }
+
       try {
         await signInWithEmailAndPassword(auth, email, pass);
       } catch (err) {
-        showAuthError("فشل تسجيل الدخول: البريد أو كلمة المرور غير صحيحة");
+        console.error("Login error code:", err.code, err.message);
+        let msg = "فشل تسجيل الدخول: البريد أو كلمة المرور غير صحيحة";
+        if (err.code === 'auth/invalid-email') msg = "صيغة البريد الإلكتروني غير صحيحة";
+        if (err.code === 'auth/user-not-found') msg = "هذا البريد غير مسجل في النظام";
+        if (err.code === 'auth/wrong-password') msg = "كلمة المرور غير صحيحة";
+        if (err.code === 'auth/network-request-failed') msg = "خطأ في الاتصال بالشبكة";
+        showAuthError(msg);
       }
     });
 
-    // تسجيل الخروج
     document.getElementById("btnLogout").addEventListener("click", () => signOut(auth));
 
     function showAuthError(msg) {
@@ -187,39 +202,41 @@
       err.style.display = "block";
     }
 
-    // جلب المستندات مقسمة (Pagination)
     async function loadSubmissions(startDoc = null) {
       const container = document.getElementById("submissionsList");
       container.innerHTML = "جاري التحميل...";
 
-      let q = query(
-        collection(db, "submissions"),
-        orderBy("createdAt", "desc"),
-        limit(PAGE_SIZE)
-      );
-
-      if (startDoc) {
-        q = query(
+      try {
+        let q = query(
           collection(db, "submissions"),
           orderBy("createdAt", "desc"),
-          startAfter(startDoc),
           limit(PAGE_SIZE)
         );
+
+        if (startDoc) {
+          q = query(
+            collection(db, "submissions"),
+            orderBy("createdAt", "desc"),
+            startAfter(startDoc),
+            limit(PAGE_SIZE)
+          );
+        }
+
+        const snap = await getDocs(q);
+        if (snap.empty) {
+          container.innerHTML = "<div style='text-align:center; padding:40px; background:#fff;'>لا توجد مستندات مرفوعة حالياً.</div>";
+          return;
+        }
+
+        lastVisibleDoc = snap.docs[snap.docs.length - 1];
+        firstVisibleDoc = snap.docs[0];
+
+        renderDocs(snap);
+      } catch (e) {
+        container.innerHTML = `<div style='text-align:center; padding:20px; color:var(--danger);'>حدث خطأ أثناء جلب البيانات: ${e.message}</div>`;
       }
-
-      const snap = await getDocs(q);
-      if (snap.empty) {
-        container.innerHTML = "<div style='text-align:center; padding:40px; background:#fff;'>لا توجد مستندات إضافية.</div>";
-        return;
-      }
-
-      lastVisibleDoc = snap.docs[snap.docs.length - 1];
-      firstVisibleDoc = snap.docs[0];
-
-      renderDocs(snap);
     }
 
-    // عرض المستندات بطريقة فعالة دون إعادة الاستهلاك الشديد للـ DOM
     function renderDocs(snap) {
       const container = document.getElementById("submissionsList");
       container.innerHTML = "";
@@ -278,7 +295,6 @@
 
         container.appendChild(card);
 
-        // إضافة أحداث الأزرار مع التأكيد وحظر التكرار
         if (isPending) {
           card.querySelector(`#btn_app_${id}`).addEventListener('click', () => handleDecision(id, 'approved'));
           card.querySelector(`#btn_rej_${id}`).addEventListener('click', () => handleDecision(id, 'rejected'));
@@ -286,18 +302,16 @@
       });
     }
 
-    // دالة معالجة القرارات بمانع تكرار وتأكيد
     async function handleDecision(id, status) {
       const isApprove = status === 'approved';
       const actionText = isApprove ? "اعتماد هذا المستند وإصدار رقم تسلسلي رسمي؟" : "رفض هذا المستند؟";
       
-      if (!confirm(`هل أنت تأكد من رغبتك في ${actionText}`)) return;
+      if (!confirm(`هل أنت متأكد من رغبتك في ${actionText}`)) return;
 
       const btnApprove = document.getElementById(`btn_app_${id}`);
       const btnReject = document.getElementById(`btn_rej_${id}`);
       const reply = document.getElementById(`reply_${id}`).value;
 
-      // تعطيل الأزرار أثناء معالجة الطلب
       btnApprove.disabled = true;
       btnReject.disabled = true;
 
@@ -315,18 +329,13 @@
       try {
         await updateDoc(ref, updateData);
         alert(isApprove ? "تم اعتماد المستند بنجاح!" : "تم تسجيل رفض المستند.");
-        loadSubmissions(); // إعادة تحميل الصفحة لتسجيل التغييرات
+        loadSubmissions();
       } catch (e) {
         alert("حدث خطأ أثناء حفظ القرار: " + e.message);
         btnApprove.disabled = false;
         btnReject.disabled = false;
       }
     }
-
-    // التنقل بين الصفحات
-    document.getElementById("btnNextPage").addEventListener("click", () => {
-      if (lastVisibleDoc) loadSubmissions(lastVisibleDoc);
-    });
   </script>
 </body>
 </html>
