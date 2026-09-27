@@ -98,21 +98,21 @@
       </svg>
       <div>
         <h1>إثبتلي</h1>
-        <p>منصة التحقق والمصداقية — مشروع جامعي</p>
+        <p>منصة التحقق والمصداقية  </p>
       </div>
     </div>
   </header>
 
   <div class="wrap">
     <div class="notice">
-      هذا موقع مشروع جامعي للتجربة فقط، وغير تابع لأي جهة حكومية.
-      الحقل المطلوب هو الرقم الجامعي، وليس الهوية الوطنية.
+       موقع للتجربة فقط 
+      وغير تابع لأي جهة حكومية.
     </div>
 
     <div id="authCard" class="card">
       <h2>تسجيل الدخول</h2>
       <input id="fullName" placeholder="الاسم الرباعي" />
-      <input id="uniId" placeholder="الرقم الجامعي" />
+      <input id="uniId" placeholder="الهوية الوطنية" />
       <input id="phone" placeholder="رقم الجوال مثل 05xxxxxxxx" />
       <button id="sendCodeBtn">إرسال رمز التحقق</button>
       <div id="codeBox" class="hidden">
@@ -135,7 +135,7 @@
       <div id="list"></div>
     </div>
   </div>
-  <footer>إثبتلي — مشروع جامعي غير رسمي</footer>
+  <footer>إثبتلي — مشروع غير رسمي</footer>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
@@ -201,7 +201,7 @@
       const uniIdVal = document.getElementById("uniId").value.trim();
       const e164 = toE164(document.getElementById("phone").value);
       if (!name || !uniIdVal || !e164) {
-        authMsg.textContent = "أكمل الاسم والرقم الجامعي والجوال.";
+        authMsg.textContent = "أكمل الاسم والهوية الوطنية والجوال.";
         return;
       }
       localStorage.setItem("profile", JSON.stringify({ name, uniId: uniIdVal, phone: e164 }));
