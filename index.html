@@ -14,18 +14,38 @@
     .hero-inner { display:flex; align-items:center; justify-content:space-between; gap:12px; }
     .hero h1 { margin:0; color:var(--brown); }
     .hero p { margin:4px 0 0; color:#8a6240; }
+    
+    /* القائمة والتنقل */
     .nav { background:var(--brown); }
-    .nav-inner { padding:10px 20px; color:#fff; }
+    .nav-inner { padding:0 20px; display:flex; gap:10px; overflow-x:auto; }
+    .nav-btn {
+      background: transparent;
+      color: #fff;
+      border: none;
+      padding: 12px 16px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s ease;
+      width: auto;
+      margin: 0;
+    }
+    .nav-btn:hover, .nav-btn.active {
+      background: rgba(255,255,255,0.1);
+      border-bottom-color: #d9c7b0;
+    }
+
     .wrap { padding:24px 16px 40px; }
-    .card { background:#fffaf2; border:1px solid var(--line); padding:18px; margin:16px 0; }
-    input, textarea, button { width:100%; padding:12px; border:1px solid var(--line); font:inherit; margin:8px 0; }
+    .card { background:#fffaf2; border:1px solid var(--line); padding:18px; margin:16px 0; border-radius: 4px; }
+    input, textarea, button { width:100%; padding:12px; border:1px solid var(--line); font:inherit; margin:8px 0; border-radius:4px; }
     button { background:var(--brown); color:#fff; border:0; font-weight:700; cursor:pointer; }
     button.danger { background:var(--danger); }
     button.secondary { background:#8a6240; color:#fff; }
     .item { display:grid; grid-template-columns:180px 1fr; gap:14px; border-top:1px solid var(--line); padding-top:14px; margin-top:14px; }
-    .hidden { display:none; }
-    .notice { background:#f4e6cf; border:1px solid #e2c9a4; padding:12px; }
-    footer { background:var(--brown); color:#ead9c4; padding:18px 16px; }
+    .hidden { display:none !important; }
+    .notice { background:#f4e6cf; border:1px solid #e2c9a4; padding:12px; margin-bottom:15px; }
+    footer { background:var(--brown); color:#ead9c4; padding:18px 16px; margin-top:40px; }
     footer h3 { color:#fff; margin:0 0 8px; }
 
     /* إطار المستند والختم الرقمي */
@@ -37,7 +57,7 @@
       left: -10px;
       width: 85px;
       height: 85px;
-      background-image: url('logo.png');
+      background-image: url('stamp.png');
       background-size: contain;
       background-repeat: no-repeat;
       filter: drop-shadow(0px 3px 5px rgba(0,0,0,0.4));
@@ -59,14 +79,37 @@
       <img src="logo.png" alt="إثبتلي" style="height:58px;">
     </div>
   </div>
-  <div class="nav"><div class="nav-inner">الرئيسية | طلباتي | تحقق من الرابط | نبذة</div></div>
+
+  <!-- شريط النوافذ والتنقل -->
+  <div class="nav">
+    <div class="nav-inner">
+      <button class="nav-btn active" onclick="showTab('aboutTab', this)">الرئيسية (نبذة)</button>
+      <button class="nav-btn" onclick="showTab('uploadTab', this)">فحص مستند</button>
+      <button class="nav-btn" onclick="showTab('linkTab', this)">تحقق من رابط</button>
+      <button class="nav-btn" onclick="showTab('requestsTab', this)">طلباتي</button>
+    </div>
+  </div>
 
   <div class="wrap">
-    <div class="notice">يرجى إدخال البيانات للتحقق من المستندات المرفقة أو فحص الروابط.</div>
+    
+    <!-- النافذة 1: الصفحة الرئيسية (النبذة) -->
+    <div id="aboutTab" class="tab-content">
+      <div class="card">
+        <h2>عن منصة إثبتلي</h2>
+        <p style="line-height:1.8; font-size:16px;">
+          منصة <b>إثبتلي</b> هي مبادرة رقمية متخصصة في الحد من عمليات التزوير والاحتيال الإلكتروني. نقوم بمراجعة الأوراق والمستندات الرسمية وإصدار <b>ختم المصادقة الرقمية</b> المعتمد، إضافة إلى توفير أداة فورية لفحص الروابط والمواقع للتأكد من موثوقيتها قبل التعامل معها.
+        </p>
+        <div style="display:flex; gap:10px; margin-top:20px;">
+          <button onclick="switchTab('uploadTab', 1)">بدء فحص مستند جديد</button>
+          <button class="secondary" onclick="switchTab('linkTab', 2)">فحص رابط فوري</button>
+        </div>
+      </div>
+    </div>
 
-    <!-- نموذج تسجيل دخول الطالب -->
-    <div id="authCard" class="card">
+    <!-- بطاقة تسجيل الدخول العامة (تظهر بالصفحات التي تتطلب تسجيل دخول) -->
+    <div id="authCard" class="card hidden">
       <h3>تسجيل دخول المستخدم</h3>
+      <p style="font-size:14px; color:#666;">يلزم تسجيل الدخول للوصول لهذه الخدمة.</p>
       <input id="fullName" type="text" placeholder="الاسم الرباعي" />
       <input id="nationalId" type="text" placeholder="رقم الهوية الوطنية / الرقم الجامعي" />
       <input id="phone" type="tel" placeholder="رقم الجوال (مثال: +966500000000)" />
@@ -80,37 +123,49 @@
       <div id="authMsg" style="color:var(--danger); margin-top:8px;"></div>
     </div>
 
-    <!-- لوحة التحكم للطالب -->
-    <div id="appCard" class="card hidden">
-      <p id="who"></p>
-      <button id="logoutBtn" class="secondary">تسجيل الخروج</button>
-
-      <!-- قسم رفع الملف للفحص -->
-      <div class="card" style="margin-top:20px;">
+    <!-- النافذة 2: رفع مستند للفحص -->
+    <div id="uploadTab" class="tab-content hidden">
+      <div id="uploadFormCard" class="card hidden">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span id="whoUpload"></span>
+          <button id="logoutBtn1" class="secondary" style="width:auto; padding:6px 12px;">تسجيل الخروج</button>
+        </div>
         <h3>رفع مستند/صورة للفحص والمصادقة</h3>
         <input id="docFile" type="file" accept="image/*" />
         <textarea id="docNote" placeholder="اكتب ملاحظة أو وصف للمستند المرفق..."></textarea>
         <button id="uploadBtn">إرسال المستند للمراجعة</button>
-        <div id="uploadMsg"></div>
+        <div id="uploadMsg" style="margin-top:8px; font-weight:bold;"></div>
       </div>
+    </div>
 
-      <!-- قسم التحقق من الروابط -->
+    <!-- النافذة 3: التحقق من الروابط -->
+    <div id="linkTab" class="tab-content hidden">
       <div class="card">
         <h3>التحقق الفوري من الروابط</h3>
+        <p style="font-size:14px; color:#666;">أدخل أي رابط للتحقق مما إذا كان ينتمي للجهات والمؤسسات المعتمدة.</p>
         <input id="linkInput" type="url" placeholder="أدخل الرابط للتحقق منه (مثال: https://...)" />
-        <button id="checkLinkBtn">فحص الرابط</button>
-        <div id="linkResult" style="margin-top:10px; font-weight:bold;"></div>
+        <button id="checkLinkBtn">فحص الرابط الان</button>
+        <div id="linkResult" style="margin-top:15px; font-weight:bold; font-size:16px;"></div>
       </div>
-
-      <!-- قائمة الطلبات والمستندات المفحوصة -->
-      <h3>طلباتي السابقة</h3>
-      <div id="list"></div>
     </div>
+
+    <!-- النافذة 4: طلباتي السابقة -->
+    <div id="requestsTab" class="tab-content hidden">
+      <div id="requestsListCard" class="card hidden">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span id="whoRequests"></span>
+          <button id="logoutBtn2" class="secondary" style="width:auto; padding:6px 12px;">تسجيل الخروج</button>
+        </div>
+        <h3>طلباتي ومستنداتي المفحوصة</h3>
+        <div id="list"></div>
+      </div>
+    </div>
+
   </div>
 
   <footer>
-    <h3>نبذة</h3>
-    <div>منصة متخصصة بفحص الأوراق والمستندات الإلكترونية لمنع التزوير وإصدار ختم المصادقة الرقمية، مع أداة التحقق من الروابط المعتمدة.</div>
+    <h3>إثبتلي</h3>
+    <div>جميع الحقوق محفوظة منصة المصادقة والتحقق الرقمي.</div>
   </footer>
 
   <script type="module">
@@ -132,15 +187,57 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // قائمة المواقع المعتمدة
     const TRUSTED_DOMAINS = ["kau.edu.sa", "moe.gov.sa", "absher.sa", "najiz.sa", "gov.sa"];
-
+    let currentUser = null;
     let confirmationResult = null;
+
+    // التحكم بالنوافذ
+    window.showTab = (tabId, btn) => {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+      
+      document.getElementById(tabId).classList.remove('hidden');
+      if(btn) btn.classList.add('active');
+
+      checkAuthVisibility(tabId);
+    };
+
+    window.switchTab = (tabId, btnIndex) => {
+      const btns = document.querySelectorAll('.nav-btn');
+      showTab(tabId, btns[btnIndex]);
+    };
+
+    function checkAuthVisibility(tabId) {
+      const authCard = document.getElementById('authCard');
+      const uploadFormCard = document.getElementById('uploadFormCard');
+      const requestsListCard = document.getElementById('requestsListCard');
+
+      if (tabId === 'uploadTab') {
+        if (currentUser) {
+          authCard.classList.add('hidden');
+          uploadFormCard.classList.remove('hidden');
+        } else {
+          authCard.classList.remove('hidden');
+          uploadFormCard.classList.add('hidden');
+        }
+      } else if (tabId === 'requestsTab') {
+        if (currentUser) {
+          authCard.classList.add('hidden');
+          requestsListCard.classList.remove('hidden');
+        } else {
+          authCard.classList.remove('hidden');
+          requestsListCard.classList.add('hidden');
+        }
+      } else {
+        authCard.classList.add('hidden');
+      }
+    }
 
     window.onload = () => {
       window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { size: 'invisible' });
     };
 
+    // المصادقة وتأكيد الجوال
     document.getElementById("sendCodeBtn").onclick = async () => {
       const ph = document.getElementById("phone").value;
       if(!ph) return authMsg.textContent = "يرجى إدخال رقم الجوال";
@@ -162,9 +259,53 @@
       }
     };
 
-    document.getElementById("logoutBtn").onclick = () => signOut(auth);
+    const logout = () => signOut(auth);
+    document.getElementById("logoutBtn1").onclick = logout;
+    document.getElementById("logoutBtn2").onclick = logout;
 
-    // ضغط الصورة وتحويلها لـ Base64
+    // معالجة ورصد تغير حالة المستخدم
+    let unsub = null;
+    onAuthStateChanged(auth, (user) => {
+      currentUser = user;
+      const activeTab = document.querySelector('.tab-content:not(.hidden)').id;
+      checkAuthVisibility(activeTab);
+
+      if (user) {
+        document.getElementById('whoUpload').textContent = "المستخدم: " + (user.phoneNumber || user.uid);
+        document.getElementById('whoRequests').textContent = "المستخدم: " + (user.phoneNumber || user.uid);
+
+        // جلب الطلبات
+        const q = query(collection(db, "submissions"), where("uid", "==", user.uid), orderBy("createdAt", "desc"));
+        if (unsub) unsub();
+        unsub = onSnapshot(q, (snap) => {
+          const list = document.getElementById('list');
+          list.innerHTML = "";
+          snap.forEach((d) => {
+            const x = d.data();
+            const isApproved = x.status === "approved";
+            const statusLabel = isApproved 
+              ? "<b style='color:var(--brown)'>تمت المصادقة واعتماد المستند</b>" 
+              : (x.status === "rejected" ? "<b style='color:var(--danger)'>مرفوض / مستند غير مطابق</b>" : "قيد المراجعة والفحص");
+
+            list.innerHTML += `
+              <div class="item">
+                <div class="doc-container">
+                  <img src="${x.imageUrl}" alt="المستند">
+                  ${isApproved ? '<div class="stamp-badge" title="تم وضع ختم المصادقة الرقمية"></div>' : ''}
+                </div>
+                <div>
+                  <p><b>حالة المستند:</b> ${statusLabel}</p>
+                  <p><b>الملاحظة المرفقة:</b> ${x.note || "-"}</p>
+                  <p><b>رد المشرف:</b> ${x.adminReply || "بانتظار قرار المشرف"}</p>
+                </div>
+              </div>`;
+          });
+          if (!snap.size) list.innerHTML = "<p>لا توجد طلبات مستندات سابقة</p>";
+        });
+      }
+    });
+
+    // ضغط الصورة
     function processImage(file) {
       return new Promise((resolve) => {
         const reader = new FileReader();
@@ -193,7 +334,6 @@
     document.getElementById("uploadBtn").onclick = async () => {
       const file = document.getElementById("docFile").files[0];
       const note = document.getElementById("docNote").value;
-      const user = auth.currentUser;
 
       if (!file) return uploadMsg.textContent = "يرجى اختيار صورة المستند أولاً";
       uploadMsg.textContent = "جاري رفع وفحص المستند...";
@@ -201,10 +341,10 @@
       try {
         const base64Img = await processImage(file);
         await addDoc(collection(db, "submissions"), {
-          uid: user.uid,
+          uid: currentUser.uid,
           fullName: document.getElementById("fullName").value || "مستخدم",
           universityId: document.getElementById("nationalId").value || "-",
-          phone: user.phoneNumber || document.getElementById("phone").value,
+          phone: currentUser.phoneNumber || document.getElementById("phone").value,
           imageUrl: base64Img,
           note: note,
           status: "pending",
@@ -219,7 +359,7 @@
       }
     };
 
-    // أداة التحقق من الروابط
+    // فحص الروابط
     document.getElementById("checkLinkBtn").onclick = () => {
       const val = document.getElementById("linkInput").value.trim();
       const res = document.getElementById("linkResult");
@@ -242,46 +382,6 @@
         res.textContent = "الرابط المكتوب غير صحيح الصياغة.";
       }
     };
-
-    // متابعة حالة الطلبات
-    let unsub = null;
-    onAuthStateChanged(auth, (user) => {
-      if (unsub) unsub();
-      if (!user) {
-        authCard.classList.remove("hidden");
-        appCard.classList.add("hidden");
-        return;
-      }
-      authCard.classList.add("hidden");
-      appCard.classList.remove("hidden");
-      who.textContent = "المستخدم الحالي: " + (user.phoneNumber || user.uid);
-
-      const q = query(collection(db, "submissions"), where("uid", "==", user.uid), orderBy("createdAt", "desc"));
-      unsub = onSnapshot(q, (snap) => {
-        list.innerHTML = "";
-        snap.forEach((d) => {
-          const x = d.data();
-          const isApproved = x.status === "approved";
-          const statusLabel = isApproved 
-            ? "<b style='color:var(--brown)'>تمت المصادقة واختبار المستند بنجاح</b>" 
-            : (x.status === "rejected" ? "<b style='color:var(--danger)'>مرفوض / مستند غير مطابق</b>" : "قيد المراجعة والفحص");
-
-          list.innerHTML += `
-            <div class="item">
-              <div class="doc-container">
-                <img src="${x.imageUrl}" alt="المستند">
-                ${isApproved ? '<div class="stamp-badge" title="تم وضع ختم المصادقة الرقمية"></div>' : ''}
-              </div>
-              <div>
-                <p><b>حالة المستند:</b> ${statusLabel}</p>
-                <p><b>الملاحظة المرفقة:</b> ${x.note || "-"}</p>
-                <p><b>رد وتوجيه المشرف:</b> ${x.adminReply || "بانتظار قرار المشرف"}</p>
-              </div>
-            </div>`;
-        });
-        if (!snap.size) list.innerHTML = "<p>لا توجد طلبات مستندات سابقة</p>";
-      });
-    });
   </script>
 </body>
 </html>
