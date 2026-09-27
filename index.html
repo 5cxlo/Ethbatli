@@ -135,6 +135,7 @@
   <nav class="nav">
     <div class="nav-inner">
       <a href="#top">الرئيسية</a>
+      <a href="#check">تحقق</a>
       <a href="#authCard">تسجيل الدخول</a>
       <a href="#list">طلباتي</a>
       <a href="#about">نبذة</a>
@@ -144,6 +145,13 @@
   <div class="wrap" id="top">
     <div class="notice">
     موقع للتجربة الأكاديمية فقط
+    </div>
+        <div id="check" class="card">
+      <h2>تحقق من الرابط</h2>
+      <p>الصقي رابط الموقع هنا. النظام يقارنه بقائمة مواقع الجامعة المعتمدة في المشروع.</p>
+      <input id="checkUrl" placeholder="https://..." />
+      <button id="checkBtn" type="button">تحقق</button>
+      <div id="checkMsg" class="msg"></div>
     </div>
 
     <div id="authCard" class="card">
@@ -226,7 +234,41 @@
         img.src = url;
       });
     }
+    const TRUSTED_HOSTS = [
+      "kau.edu.sa",
+      "www.kau.edu.sa"
+    ];
 
+    function hostOf(raw) {
+      try {
+        const u = new URL(raw.startsWith("http") ? raw : "https://" + raw);
+        return u.hostname.toLowerCase().replace(/^www\./, "");
+      } catch {
+        return "";
+      }
+    }
+
+    document.getElementById("checkBtn").onclick = () => {
+      const raw = document.getElementById("checkUrl").value.trim();
+      const box = document.getElementById("checkMsg");
+      const host = hostOf(raw);
+      if (!host) {
+        box.style.color = "#b42318";
+        box.textContent = "الرابط غير صالح.";
+        return;
+      }
+      const ok = TRUSTED_HOSTS.some((h) => {
+        const n = h.toLowerCase().replace(/^www\./, "");
+        return host === n || host.endsWith("." + n);
+      });
+      if (ok) {
+        box.style.color = "#3f5a3a";
+        box.textContent = "الرابط ضمن المواقع المعتمدة في هذه المنصة: " + host;
+      } else {
+        box.style.color = "#b42318";
+        box.textContent = "الرابط غير موجود في قائمة المواقع المعتمدة.";
+      }
+    };
     const authMsg = document.getElementById("authMsg");
     const uploadMsg = document.getElementById("uploadMsg");
     const list = document.getElementById("list");
