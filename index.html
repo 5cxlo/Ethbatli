@@ -3,198 +3,120 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>إثبتلي </title>
+  <title>إثبتلي | البوابة الرئيسية</title>
   <style>
-    :root {
-  --brown: #3f5a3a;
---brown-2: #5a7a52;
---cream: #eef2e6;
-      --card: #fffaf2;
-      --text: #2b1c12;
-      --muted: #7a6554;
-      --line: #d9c7b0;
-      --danger: #b42318;
-    }
+    :root { --brown:#3f5a3a; --cream:#eef2e6; --text:#2b1c12; --line:#d9c7b0; --danger:#b42318; --success:#15803d; }
     * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: "Segoe UI", Tahoma, sans-serif;
-      background: var(--cream);
-      color: var(--text);
-    }
-    .topbar {
-      background: var(--brown);
-      color: #f7efe4;
-      font-size: 13px;
-      padding: 8px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .hero {
-      background: #f7f1e6;
-      padding: 22px 20px 16px;
-    }
-    .hero-inner, .nav-inner, .wrap, .foot-inner {
-      max-width: 980px;
-      margin: 0 auto;
-    }
-    .hero-inner {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-    }
-    .brand { display: flex; align-items: center; gap: 12px; }
-    .logo { width: 70px; height: 70px; object-fit: contain; }
-    .hero h1 { margin: 0; font-size: 32px; color: var(--brown); }
-    .hero p { margin: 4px 0 0; color: var(--brown-2); }
-    .nav {
-      background: var(--brown);
-      color: #fff;
-    }
-    .nav-inner {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px 18px;
-      padding: 10px 20px;
-    }
-    .nav a {
-      color: #fff;
-      text-decoration: none;
-      font-size: 14px;
-    }
-    .wrap { padding: 28px 16px 40px; min-height: 42vh; }
-    .notice {
-      background: #f4e6cf;
-      border: 1px solid #e2c9a4;
-      color: #6a4a28;
-      padding: 12px 14px;
-      margin-bottom: 16px;
-    }
-    .card {
-      background: var(--card);
-      border: 1px solid var(--line);
-      padding: 18px;
-      margin: 16px 0;
-    }
-    input, textarea, button {
-      width: 100%;
-      padding: 12px;
-      border-radius: 4px;
-      border: 1px solid var(--line);
-      background: #fff;
-      color: var(--text);
-      font: inherit;
-      margin: 8px 0;
-    }
-    button {
-      background: var(--brown);
-      color: #fff;
-      font-weight: 700;
-      border: 0;
-      cursor: pointer;
-    }
-    button.secondary { background: #8a6240; }
-    .hidden { display: none; }
-    .item { display: grid; grid-template-columns: 120px 1fr; gap: 12px; border-top: 1px solid var(--line); padding-top: 12px; margin-top: 12px; }
-    .item img { width: 120px; height: 120px; object-fit: cover; }
-    .msg { min-height: 20px; color: var(--danger); }
-    footer {
-      background: var(--brown);
-      color: #f7efe4;
-      padding: 22px 16px;
-    }
-    footer h3 { margin: 0 0 8px; }
-    footer p { margin: 0; line-height: 1.7; color: #ead9c4; }
-    #recaptcha-container { min-height: 1px; }
-    @media (max-width: 640px) {
-      .hero-inner { flex-direction: column; align-items: flex-start; }
-      .hero h1 { font-size: 26px; }
+    body { margin:0; font-family:"Segoe UI", Tahoma, sans-serif; background:var(--cream); color:var(--text); }
+    .topbar { background:var(--brown); color:#f7efe4; font-size:13px; padding:8px 20px; display:flex; justify-content:space-between; }
+    .hero { background:#f7f1e6; padding:18px 20px; }
+    .hero-inner, .wrap, .nav-inner { max-width:980px; margin:0 auto; }
+    .hero-inner { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .hero h1 { margin:0; color:var(--brown); }
+    .hero p { margin:4px 0 0; color:#8a6240; }
+    .nav { background:var(--brown); }
+    .nav-inner { padding:10px 20px; color:#fff; }
+    .wrap { padding:24px 16px 40px; }
+    .card { background:#fffaf2; border:1px solid var(--line); padding:18px; margin:16px 0; }
+    input, textarea, button { width:100%; padding:12px; border:1px solid var(--line); font:inherit; margin:8px 0; }
+    button { background:var(--brown); color:#fff; border:0; font-weight:700; cursor:pointer; }
+    button.danger { background:var(--danger); }
+    button.secondary { background:#8a6240; color:#fff; }
+    .item { display:grid; grid-template-columns:180px 1fr; gap:14px; border-top:1px solid var(--line); padding-top:14px; margin-top:14px; }
+    .hidden { display:none; }
+    .notice { background:#f4e6cf; border:1px solid #e2c9a4; padding:12px; }
+    footer { background:var(--brown); color:#ead9c4; padding:18px 16px; }
+    footer h3 { color:#fff; margin:0 0 8px; }
+
+    /* إطار المستند والختم الرقمي */
+    .doc-container { position: relative; width: 180px; height: 180px; }
+    .doc-container img { width: 100%; height: 100%; object-fit: cover; border: 1px solid var(--line); }
+    .stamp-badge {
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      width: 85px;
+      height: 85px;
+      background-image: url('logo.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      filter: drop-shadow(0px 3px 5px rgba(0,0,0,0.4));
+      pointer-events: none;
     }
   </style>
 </head>
 <body>
   <div class="topbar">
-    <span>مشروع جامعي</span>
-    <span>إثبتلي</span>
+    <span>منصة تحقق للمستندات والروابط</span>
+    <span>خدمات المصادقة الرقمية</span>
   </div>
-
   <div class="hero">
     <div class="hero-inner">
-      <div class="brand">
-        <div>
-          <h1>إثبتلي</h1>
-          <p>منصة التحقق والمصداقية</p>
-        </div>
+      <div>
+        <h1>إثبتلي</h1>
+        <p>منصة فحص المستندات والتحقق من الروابط</p>
       </div>
-      <img class="logo" src="logo.png" alt="إثبتلي" />
+      <img src="logo.png" alt="إثبتلي" style="height:58px;">
     </div>
   </div>
+  <div class="nav"><div class="nav-inner">الرئيسية | طلباتي | تحقق من الرابط | نبذة</div></div>
 
-  <nav class="nav">
-    <div class="nav-inner">
-      <a href="#top">الرئيسية</a>
-      <a href="#check">تحقق</a>
-      <a href="#authCard">تسجيل الدخول</a>
-      <a href="#list">طلباتي</a>
-      <a href="#about">نبذة</a>
-    </div>
-  </nav>
+  <div class="wrap">
+    <div class="notice">يرجى إدخال البيانات للتحقق من المستندات المرفقة أو فحص الروابط.</div>
 
-  <div class="wrap" id="top">
-    <div class="notice">
-    موقع للتجربة الأكاديمية فقط
-    </div>
-        <div id="check" class="card">
-      <h2>تحقق من الرابط</h2>
-      <p>الصقي رابط الموقع هنا. النظام يقارنه بقائمة مواقع الجامعة المعتمدة في المشروع.</p>
-      <input id="checkUrl" placeholder="https://..." />
-      <button id="checkBtn" type="button">تحقق</button>
-      <div id="checkMsg" class="msg"></div>
-    </div>
-
+    <!-- نموذج تسجيل دخول الطالب -->
     <div id="authCard" class="card">
-      <h2>تسجيل الدخول</h2>
-      <input id="fullName" placeholder="الاسم الرباعي" />
-      <input id="uniId" placeholder="الهوية الوطنية" />
-      <input id="phone" placeholder="رقم الجوال مثل 05xxxxxxxx" />
+      <h3>تسجيل دخول المستخدم</h3>
+      <input id="fullName" type="text" placeholder="الاسم الرباعي" />
+      <input id="nationalId" type="text" placeholder="رقم الهوية الوطنية / الرقم الجامعي" />
+      <input id="phone" type="tel" placeholder="رقم الجوال (مثال: +966500000000)" />
       <button id="sendCodeBtn">إرسال رمز التحقق</button>
-      <div id="codeBox" class="hidden">
-        <input id="code" placeholder="رمز الرسالة" />
-        <button id="verifyBtn">تأكيد الدخول</button>
-      </div>
       <div id="recaptcha-container"></div>
-      <div id="authMsg" class="msg"></div>
+      
+      <div id="otpSection" class="hidden">
+        <input id="otpCode" type="text" placeholder="أدخل رمز التحقق (OTP)" />
+        <button id="verifyOtpBtn">تأكيد الدخول</button>
+      </div>
+      <div id="authMsg" style="color:var(--danger); margin-top:8px;"></div>
     </div>
 
+    <!-- لوحة التحكم للطالب -->
     <div id="appCard" class="card hidden">
       <p id="who"></p>
-      <button id="logoutBtn" class="secondary">خروج</button>
-      <h2>رفع ملف للمراجعة</h2>
-      <input id="note" placeholder="ملاحظة اختيارية" />
-      <input id="file" type="file" accept="image/*" />
-      <button id="uploadBtn">إرسال للمراجعة</button>
-      <div id="uploadMsg" class="msg"></div>
-      <h2>طلباتي</h2>
+      <button id="logoutBtn" class="secondary">تسجيل الخروج</button>
+
+      <!-- قسم رفع الملف للفحص -->
+      <div class="card" style="margin-top:20px;">
+        <h3>رفع مستند/صورة للفحص والمصادقة</h3>
+        <input id="docFile" type="file" accept="image/*" />
+        <textarea id="docNote" placeholder="اكتب ملاحظة أو وصف للمستند المرفق..."></textarea>
+        <button id="uploadBtn">إرسال المستند للمراجعة</button>
+        <div id="uploadMsg"></div>
+      </div>
+
+      <!-- قسم التحقق من الروابط -->
+      <div class="card">
+        <h3>التحقق الفوري من الروابط</h3>
+        <input id="linkInput" type="url" placeholder="أدخل الرابط للتحقق منه (مثال: https://...)" />
+        <button id="checkLinkBtn">فحص الرابط</button>
+        <div id="linkResult" style="margin-top:10px; font-weight:bold;"></div>
+      </div>
+
+      <!-- قائمة الطلبات والمستندات المفحوصة -->
+      <h3>طلباتي السابقة</h3>
       <div id="list"></div>
     </div>
   </div>
 
-  <footer id="about">
-    <div class="foot-inner">
-      <h3>نبذة عن المنصة</h3>
-      <p>
-        إثبتلي منصة لمراجعة الادلة المرفقة. يسجّل المستخدم بياناته ويرفع الصورة،
-        ثم يراجع المشرف الطلب ويرسل الرد عبر الصفحة
-      </p>
-    </div>
+  <footer>
+    <h3>نبذة</h3>
+    <div>منصة متخصصة بفحص الأوراق والمستندات الإلكترونية لمنع التزوير وإصدار ختم المصادقة الرقمية، مع أداة التحقق من الروابط المعتمدة.</div>
   </footer>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-    import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
-    import { getFirestore, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+    import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+    import { getFirestore, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDj5Hr4ONRDgEJLgRMExcYXnJnrS20ge_k",
@@ -208,181 +130,156 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    auth.languageCode = "ar";
     const db = getFirestore(app);
 
-    function compressImage(file) {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        const url = URL.createObjectURL(file);
-        img.onload = () => {
-          const max = 900;
-          let w = img.width, h = img.height;
-          if (w > max || h > max) {
-            const s = Math.min(max / w, max / h);
-            w = Math.round(w * s);
-            h = Math.round(h * s);
-          }
-          const canvas = document.createElement("canvas");
-          canvas.width = w;
-          canvas.height = h;
-          canvas.getContext("2d").drawImage(img, 0, 0, w, h);
-          URL.revokeObjectURL(url);
-          resolve(canvas.toDataURL("image/jpeg", 0.7));
-        };
-        img.onerror = reject;
-        img.src = url;
-      });
-    }
-    const TRUSTED_HOSTS = [
-      "kau.edu.sa",
-      "www.kau.edu.sa"
-    ];
+    // قائمة المواقع المعتمدة
+    const TRUSTED_DOMAINS = ["kau.edu.sa", "moe.gov.sa", "absher.sa", "najiz.sa", "gov.sa"];
 
-    function hostOf(raw) {
-      try {
-        const u = new URL(raw.startsWith("http") ? raw : "https://" + raw);
-        return u.hostname.toLowerCase().replace(/^www\./, "");
-      } catch {
-        return "";
-      }
-    }
+    let confirmationResult = null;
 
-    document.getElementById("checkBtn").onclick = () => {
-      const raw = document.getElementById("checkUrl").value.trim();
-      const box = document.getElementById("checkMsg");
-      const host = hostOf(raw);
-      if (!host) {
-        box.style.color = "#b42318";
-        box.textContent = "الرابط غير صالح.";
-        return;
-      }
-      const ok = TRUSTED_HOSTS.some((h) => {
-        const n = h.toLowerCase().replace(/^www\./, "");
-        return host === n || host.endsWith("." + n);
-      });
-      if (ok) {
-        box.style.color = "#3f5a3a";
-        box.textContent = "الرابط ضمن المواقع المعتمدة في هذه المنصة: " + host;
-      } else {
-        box.style.color = "#b42318";
-        box.textContent = "الرابط غير موجود في قائمة المواقع المعتمدة.";
-      }
+    window.onload = () => {
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { size: 'invisible' });
     };
-    const authMsg = document.getElementById("authMsg");
-    const uploadMsg = document.getElementById("uploadMsg");
-    const list = document.getElementById("list");
-    let confirmation = null;
-
-    function toE164(p) {
-      const raw = (p || "").trim();
-      if (raw.startsWith("+") && raw.replace(/\D/g, "").length >= 10) return "+" + raw.replace(/\D/g, "");
-      const d = raw.replace(/\D/g, "");
-      if (d.startsWith("966")) return "+" + d;
-      if (d.startsWith("1") && d.length === 11) return "+" + d;
-      if (d.startsWith("05") && d.length === 10) return "+966" + d.slice(1);
-      if (d.startsWith("5") && d.length === 9) return "+966" + d;
-      return null;
-    }
-
-    window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", { size: "invisible" });
 
     document.getElementById("sendCodeBtn").onclick = async () => {
-      const name = document.getElementById("fullName").value.trim();
-      const uniIdVal = document.getElementById("uniId").value.trim();
-      const e164 = toE164(document.getElementById("phone").value);
-      if (!name || !uniIdVal || !e164) {
-        authMsg.textContent = "أكمل الاسم والهوية الوطنية والجوال.";
-        return;
-      }
-      localStorage.setItem("profile", JSON.stringify({ name, uniId: uniIdVal, phone: e164 }));
+      const ph = document.getElementById("phone").value;
+      if(!ph) return authMsg.textContent = "يرجى إدخال رقم الجوال";
       try {
-        confirmation = await signInWithPhoneNumber(auth, e164, window.recaptchaVerifier);
-        document.getElementById("codeBox").classList.remove("hidden");
-        authMsg.textContent = "أدخل رمز التحقق.";
+        confirmationResult = await signInWithPhoneNumber(auth, ph, window.recaptchaVerifier);
+        document.getElementById("otpSection").classList.remove("hidden");
+        authMsg.textContent = "تم إرسال رمز التحقق إلى جوالك";
       } catch (e) {
-        authMsg.textContent = e.message;
+        authMsg.textContent = "خطأ في الإرسال: " + e.message;
       }
     };
 
-    document.getElementById("verifyBtn").onclick = async () => {
+    document.getElementById("verifyOtpBtn").onclick = async () => {
+      const code = document.getElementById("otpCode").value;
       try {
-        await confirmation.confirm(document.getElementById("code").value.trim());
+        await confirmationResult.confirm(code);
       } catch (e) {
-        authMsg.textContent = "الرمز غير صحيح.";
+        authMsg.textContent = "رمز التحقق غير صحيح";
       }
     };
 
     document.getElementById("logoutBtn").onclick = () => signOut(auth);
 
+    // ضغط الصورة وتحويلها لـ Base64
+    function processImage(file) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement("canvas");
+            let w = img.width, h = img.height;
+            const max = 800;
+            if (w > max || h > max) {
+              if (w > h) { h = Math.round((h * max) / w); w = max; }
+              else { w = Math.round((w * max) / h); h = max; }
+            }
+            canvas.width = w; canvas.height = h;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL("image/jpeg", 0.7));
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // رفع المستند
     document.getElementById("uploadBtn").onclick = async () => {
+      const file = document.getElementById("docFile").files[0];
+      const note = document.getElementById("docNote").value;
       const user = auth.currentUser;
-      const file = document.getElementById("file").files[0];
-      const profile = JSON.parse(localStorage.getItem("profile") || "{}");
-      if (!user || !file) {
-        uploadMsg.textContent = "اختر صورة بعد تسجيل الدخول";
-        return;
-      }
-      uploadMsg.textContent = "جاري الرفع...";
+
+      if (!file) return uploadMsg.textContent = "يرجى اختيار صورة المستند أولاً";
+      uploadMsg.textContent = "جاري رفع وفحص المستند...";
+
       try {
-        const imageUrl = await compressImage(file);
+        const base64Img = await processImage(file);
         await addDoc(collection(db, "submissions"), {
-          userId: user.uid,
-          fullName: profile.name || "",
-          universityId: profile.uniId || "",
-          phone: user.phoneNumber || profile.phone || "",
-          imageUrl,
-          fileName: file.name,
-          note: document.getElementById("note").value || "",
+          uid: user.uid,
+          fullName: document.getElementById("fullName").value || "مستخدم",
+          universityId: document.getElementById("nationalId").value || "-",
+          phone: user.phoneNumber || document.getElementById("phone").value,
+          imageUrl: base64Img,
+          note: note,
           status: "pending",
           adminReply: "",
           createdAt: serverTimestamp()
         });
-        uploadMsg.textContent = "تم الإرسال للمراجعة.";
-        document.getElementById("file").value = "";
-        document.getElementById("note").value = "";
+        uploadMsg.textContent = "تم إرسال المستند بنجاح وهو قيد المراجعة الفنية.";
+        document.getElementById("docFile").value = "";
+        document.getElementById("docNote").value = "";
       } catch (e) {
-        uploadMsg.textContent = e.message;
+        uploadMsg.textContent = "خطأ أثناء الرفع: " + e.message;
       }
     };
 
-    function statusText(s) {
-      if (s === "approved") return "تمت الموافقة";
-      if (s === "rejected") return "مرفوض";
-      return "بانتظار المراجعة";
-    }
+    // أداة التحقق من الروابط
+    document.getElementById("checkLinkBtn").onclick = () => {
+      const val = document.getElementById("linkInput").value.trim();
+      const res = document.getElementById("linkResult");
+      if(!val) { res.textContent = "يرجى إدخال الرابط أولاً"; return; }
 
+      try {
+        const urlObj = new URL(val.startsWith("http") ? val : "https://" + val);
+        const host = urlObj.hostname.toLowerCase();
+        const isTrusted = TRUSTED_DOMAINS.some(domain => host === domain || host.endsWith("." + domain));
+
+        if(isTrusted) {
+          res.style.color = "var(--success)";
+          res.textContent = "✅ الرابط موثوق ومسجل ضمن قائمة الجهات الرسمية المعتمدة (" + host + ")";
+        } else {
+          res.style.color = "var(--danger)";
+          res.textContent = "⚠️ تنبيه: هذا الرابط غير مسجل في قائمة المواقع المعتمدة.";
+        }
+      } catch(e) {
+        res.style.color = "var(--danger)";
+        res.textContent = "الرابط المكتوب غير صحيح الصياغة.";
+      }
+    };
+
+    // متابعة حالة الطلبات
     let unsub = null;
-    onAuthStateChanged(auth, async (user) => {
+    onAuthStateChanged(auth, (user) => {
       if (unsub) unsub();
       if (!user) {
         authCard.classList.remove("hidden");
         appCard.classList.add("hidden");
         return;
       }
-      const profile = JSON.parse(localStorage.getItem("profile") || "{}");
-      if (profile.name) {
-        await setDoc(doc(db, "users", user.uid), {
-          fullName: profile.name,
-          universityId: profile.uniId,
-          phone: user.phoneNumber
-        }, { merge: true });
-      }
       authCard.classList.add("hidden");
       appCard.classList.remove("hidden");
-      who.textContent = (profile.name || "طالب") + " — " + (user.phoneNumber || "");
-      const q = query(collection(db, "submissions"), where("userId", "==", user.uid), orderBy("createdAt", "desc"));
+      who.textContent = "المستخدم الحالي: " + (user.phoneNumber || user.uid);
+
+      const q = query(collection(db, "submissions"), where("uid", "==", user.uid), orderBy("createdAt", "desc"));
       unsub = onSnapshot(q, (snap) => {
         list.innerHTML = "";
         snap.forEach((d) => {
           const x = d.data();
-          list.innerHTML += `<div class="item"><img src="${x.imageUrl}" alt=""><div>
-            <b>${statusText(x.status)}</b>
-            <p>${x.note || ""}</p>
-            <p>رد المشرف: ${x.adminReply || "لا يوجد بعد"}</p>
-          </div></div>`;
+          const isApproved = x.status === "approved";
+          const statusLabel = isApproved 
+            ? "<b style='color:var(--brown)'>تمت المصادقة واختبار المستند بنجاح</b>" 
+            : (x.status === "rejected" ? "<b style='color:var(--danger)'>مرفوض / مستند غير مطابق</b>" : "قيد المراجعة والفحص");
+
+          list.innerHTML += `
+            <div class="item">
+              <div class="doc-container">
+                <img src="${x.imageUrl}" alt="المستند">
+                ${isApproved ? '<div class="stamp-badge" title="تم وضع ختم المصادقة الرقمية"></div>' : ''}
+              </div>
+              <div>
+                <p><b>حالة المستند:</b> ${statusLabel}</p>
+                <p><b>الملاحظة المرفقة:</b> ${x.note || "-"}</p>
+                <p><b>رد وتوجيه المشرف:</b> ${x.adminReply || "بانتظار قرار المشرف"}</p>
+              </div>
+            </div>`;
         });
-        if (!snap.size) list.innerHTML = "<p>لا توجد طلبات</p>";
+        if (!snap.size) list.innerHTML = "<p>لا توجد طلبات مستندات سابقة</p>";
       });
     });
   </script>
