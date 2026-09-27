@@ -28,18 +28,32 @@
     .notice { background:#f4e6cf; border:1px solid #e2c9a4; padding:12px; }
     footer { background:var(--brown); color:#ead9c4; padding:18px 16px; }
     footer h3 { color:#fff; margin:0 0 8px; }
+
+    /* معاينة الختم في لوحة الأدمن */
+    .admin-doc-wrap { position: relative; width: 180px; height: 180px; }
+    .stamp-overlay {
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      width: 85px;
+      height: 85px;
+      background-image: url('logo.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
   <div class="topbar">
     <span>منصة تحقق </span>
-    <span>لوحة المراجعة</span>
+    <span>لوحة المراجعة الرقمية للمستندات</span>
   </div>
   <div class="hero">
     <div class="hero-inner">
       <div>
         <h1>إثبتلي</h1>
-        <p>لوحة مراجعة الطلبات</p>
+        <p>لوحة مراجعة المستندات واعتماد ختم المصادقة</p>
       </div>
       <img src="logo.png" alt="إثبتلي" style="height:58px;">
     </div>
@@ -61,7 +75,7 @@
   </div>
   <footer>
     <h3>نبذة</h3>
-    <div>منصة لمراجعة الادلة المرفقة وإرسال الرد .</div>
+    <div>منصة لمراجعة الأوراق والمستندات المرفقة، مطابقتها وإصدار ختم المصادقة الرقمية.</div>
   </footer>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
@@ -90,9 +104,16 @@
 
     async function review(id, status) {
       const reply = document.getElementById("reply-" + id).value;
+      let defaultMsg = "";
+      if (status === "approved") {
+        defaultMsg = "تمت مراجعة المستند بنجاح وتم إصدار (ختم المصادقة الرقمية).";
+      } else {
+        defaultMsg = "تم رفض المستند للشك في صحته أو عدم اكتمال البيانات.";
+      }
+
       await updateDoc(doc(db, "submissions", id), {
-        status,
-        adminReply: reply || (status === "approved" ? "تمت الموافقة" : "مرفوض"),
+        status: status,
+        adminReply: reply || defaultMsg,
         reviewedAt: serverTimestamp()
       });
     }
@@ -115,16 +136,26 @@
         list.innerHTML = "";
         snap.forEach((d) => {
           const x = d.data();
-          list.innerHTML += `<div class="item"><img src="${x.imageUrl}" alt=""><div>
-            <p><b>الاسم:</b> ${x.fullName || "-"}</p>
-            <p><b>الهوية الوطنية:</b> ${x.universityId || "-"}</p>
-            <p><b>الجوال:</b> ${x.phone || "-"}</p>
-            <p><b>الحالة:</b> ${x.status}</p>
-            <p>${x.note || ""}</p>
-            <textarea id="reply-${d.id}">${x.adminReply || ""}</textarea>
-            <button onclick="review('${d.id}','approved')">موافقة</button>
-            <button class="danger" onclick="review('${d.id}','rejected')">رفض</button>
-          </div></div>`;
+          const isApproved = x.status === "approved";
+
+          list.innerHTML += `<div class="item">
+            <div class="admin-doc-wrap">
+              <a href="${x.imageUrl}" target="_blank">
+                <img src="${x.imageUrl}" alt="صورة المستند">
+              </a>
+              ${isApproved ? '<div class="stamp-overlay" title="ختم المصادقة موثق"></div>' : ''}
+            </div>
+            <div>
+              <p><b>الاسم:</b> ${x.fullName || "-"}</p>
+              <p><b>رقم الهوية / الرقم الجامعي:</b> ${x.universityId || "-"}</p>
+              <p><b>الجوال:</b> ${x.phone || "-"}</p>
+              <p><b>حالة المستند:</b> ${x.status === "approved" ? "تمت المصادقة بالختم" : (x.status === "rejected" ? "مرفوض" : "بانتظار الفحص")}</p>
+              <p><b>ملاحظة المرفق:</b> ${x.note || "-"}</p>
+              <textarea id="reply-${d.id}" placeholder="اكتب الرد أو اتركه فارغاً للرد التلقائي">${x.adminReply || ""}</textarea>
+              <button onclick="review('${d.id}','approved')">موافقة وإصدار (ختم المصادقة)</button>
+              <button class="danger" onclick="review('${d.id}','rejected')">رفض المستند</button>
+            </div>
+          </div>`;
         });
         if (!snap.size) list.innerHTML = "<p>لا توجد طلبات</p>";
       });
