@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>إثبتلي | مشروع جامعي</title>
+  <title>إثبتلي </title>
   <style>
     :root {
   --brown: #3f5a3a;
@@ -143,13 +143,13 @@
 
   <div class="wrap" id="top">
     <div class="notice">
-      موقع للتجربة الأكاديمية فقط. الحقل المطلوب هو الرقم الجامعي.
+    موقع للتجربة الأكاديمية فقط
     </div>
 
     <div id="authCard" class="card">
       <h2>تسجيل الدخول</h2>
       <input id="fullName" placeholder="الاسم الرباعي" />
-      <input id="uniId" placeholder="الرقم الجامعي" />
+      <input id="uniId" placeholder="الهوية الوطنية" />
       <input id="phone" placeholder="رقم الجوال مثل 05xxxxxxxx" />
       <button id="sendCodeBtn">إرسال رمز التحقق</button>
       <div id="codeBox" class="hidden">
@@ -177,8 +177,8 @@
     <div class="foot-inner">
       <h3>نبذة عن المنصة</h3>
       <p>
-        إثبتلي منصة جامعية لمراجعة الملفات المرفقة. يسجّل المستخدم بياناته ويرفع الصورة،
-        ثم يراجع المشرف الطلب ويرسل الرد عبر الصفحة. الموقع أُعد لغرض أكاديمي فقط.
+        إثبتلي منصة لمراجعة الادلة المرفقة. يسجّل المستخدم بياناته ويرفع الصورة،
+        ثم يراجع المشرف الطلب ويرسل الرد عبر الصفحة
       </p>
     </div>
   </footer>
@@ -250,7 +250,7 @@
       const uniIdVal = document.getElementById("uniId").value.trim();
       const e164 = toE164(document.getElementById("phone").value);
       if (!name || !uniIdVal || !e164) {
-        authMsg.textContent = "أكمل الاسم والرقم الجامعي والجوال.";
+        authMsg.textContent = "أكمل الاسم والهوية الوطنية والجوال.";
         return;
       }
       localStorage.setItem("profile", JSON.stringify({ name, uniId: uniIdVal, phone: e164 }));
