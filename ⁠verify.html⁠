@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>التحقق من موثوقية المستند | منصة إثبتلي</title>
+  <style>
+    :root {
+      --primary-green: #1c422b;
+      --accent-green: #295a3c;
+      --light-green: #eaf1ec;
+      --bg-beige: #f6f4ee;
+      --card-bg: #ffffff;
+      --border-color: #e2dcd0;
+      --gold-accent: #c5a059;
+      --text-main: #1a251c;
+      --text-muted: #5c685d;
+      --danger: #b42318;
+      --success: #15803d;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-beige); color: var(--text-main); line-height: 1.6; padding: 20px; display: flex; flex-direction: column; min-height: 100vh; }
+
+    .verify-container { max-width: 600px; margin: 40px auto; width: 100%; flex: 1; }
+    
+    .verify-card {
+      background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 30px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; border-top: 5px solid var(--primary-green);
+    }
+
+    .logo-area { margin-bottom: 20px; }
+    .logo-area h2 { color: var(--primary-green); font-size: 22px; font-weight: 800; }
+    .logo-area p { color: var(--gold-accent); font-size: 13px; font-weight: 600; margin-top: 4px; }
+
+    .status-box {
+      padding: 20px; border-radius: 8px; margin: 20px 0; font-size: 16px; font-weight: bold; display: none;
+    }
+    .status-success { background: #dcfce7; color: var(--success); border: 1px solid #bbf7d0; }
+    .status-error { background: #fee2e2; color: var(--danger); border: 1px solid #fecaca; }
+    .status-loading { background: var(--light-green); color: var(--primary-green); border: 1px solid var(--border-color); display: block; }
+
+    .details-list { text-align: right; margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 15px; }
+    .details-list p { font-size: 14px; margin-bottom: 8px; color: var(--text-main); }
+    .details-list span { color: var(--text-muted); font-weight: normal; }
+
+    .footer-note { text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 30px; }
+  </style>
+</head>
+<body>
+
+  <div class="verify-container">
+    <div class="verify-card">
+      <div class="logo-area">
+        <h2>منصة إثبتلي الرقمية</h2>
+        <p>نظام التحقق والمصادقة المركزي للوثائق الرسمية</p>
+      </div>
+
+      <hr style="border:0; border-top:1px solid var(--border-color); margin-bottom:20px;">
+
+      <!-- حالة التحقق -->
+      <div id="loadingStatus" class="status-box status-loading">جاري فحص الرقم التسلسلي والتحقق من قواعد البيانات...</div>
+      <div id="successStatus" class="status-box status-success">
+        ✅ المستند رسمي، موثق ومعتمد بنجاح من منصة إثبتلي
+      </div>
+      <div id="errorStatus" class="status-box status-error">
+        ❌ تنبيه: المستند غير مسجل، أو مزور، أو تم إلغاء اعتماده.
+      </div>
+
+      <!-- تفاصيل المستند في حال وجد -->
+      <div id="docDetails" class="details-list" style="display: none;">
+        <p><b>الرقم التسلسلي:</b> <span id="resSerial"></span></p>
+        <p><b>اسم صاحب المستند:</b> <span id="resName"></span></p>
+        <p><b>تاريخ الاعتماد:</b> <span id="resDate"></span></p>
+        <p><b>جهة المراجعة:</b> <span>قسم التدقيق والمصادقة الفنية - إثبتلي</span></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    جميع الحقوق محفوظة © منصة إثبتلي للتوثيق والمصادقة الرقمية 2026
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+    import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDj5Hr4ONRDgEJLgRMExcYXnJnrS20ge_k",
+      authDomain: "ethbatli.firebaseapp.com",
+      projectId: "ethbatli",
+      storageBucket: "ethbatli.firebasestorage.app",
+      messagingSenderId: "824449568013",
+      appId: "1:824449568013:web:f606ccd14e23463b763444",
+      measurementId: "G-V5BRB4MRVQ"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    async function verifyDocument() {
+      // قراءة الرقم التسلسلي من رابط الصفحة (مثلاً: verify.html?serial=ETH-2026-XXXXX)
+      const urlParams = new URLSearchParams(window.location.search);
+      const serialNumber = urlParams.get('serial');
+
+      const loadingBox = document.getElementById('loadingStatus');
+      const successBox = document.getElementById('successStatus');
+      const errorBox = document.getElementById('errorStatus');
+      const detailsBox = document.getElementById('docDetails');
+
+      if (!serialNumber) {
+        loadingBox.style.display = 'none';
+        errorBox.style.display = 'block';
+        errorBox.innerText = '❌ لم يتم العثور على رقم تسلسلي للتحقق منه في الرابط.';
+        return;
+      }
+
+      try {
+        // البحث عن المستند في قاعدة البيانات باستخدام الرقم التسلسلي والحالة "approved" فقط
+        const q = query(
+          collection(db, "submissions"), 
+          where("serialNumber", "==", serialNumber),
+          where("status", "==", "approved")
+        );
+
+        const querySnapshot = await getDocs(q);
+
+        loadingBox.style.display = 'none';
+
+        if (!querySnapshot.empty) {
+          // وجدنا مستند مطابق وصحيح
+          const docData = querySnapshot.docs[0].data();
+          
+          successBox.style.display = 'block';
+          detailsBox.style.display = 'block';
+
+          document.getElementById('resSerial').innerText = docData.serialNumber || serialNumber;
+          document.getElementById('resName').innerText = docData.fullName || "مفوض رسمي";
+          
+          // معالجة التاريخ والوقت لعرضه بشكل واضح
+          let dateStr = "مستند رسمي معتمد";
+          if (docData.updatedAt) {
+            dateStr = new Date(docData.updatedAt).toLocaleString('ar-SA');
+          }
+          document.getElementById('resDate').innerText = dateStr;
+
+        } else {
+          // لم يتم العثور على المستند أو غير معتمد
+          errorBox.style.display = 'block';
+        }
+
+      } catch (err) {
+        loadingBox.style.display = 'none';
+        errorBox.style.display = 'block';
+        errorBox.innerText = '❌ حدث خطأ أثناء الاتصال بقاعدة البيانات للتحقق.';
+        console.error(err);
+      }
+    }
+
+    // تنفيذ التحقق فور تحميل الصفحة
+    window.addEventListener('DOMContentLoaded', verifyDocument);
+  </script>
+</body>
+</html>
