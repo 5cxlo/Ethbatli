@@ -205,7 +205,7 @@
       </div>
     </div>
 
-    <!-- نافذة: تتبع طلب سابق (جديد) -->
+    <!-- نافذة: تتبع طلب سابق -->
     <div id="trackTab" class="tab-content hidden">
       <div class="card-box">
         <h3>تتبع حالة الطلب والمستندات</h3>
@@ -221,7 +221,7 @@
       <div class="card-box">
         <h3>التحقق الفوري من موثوقية الروابط</h3>
         <p style="font-size:13px; color:var(--text-muted); margin-bottom: 14px;">قم بوضع رابط الموقع الإلكتروني للتأكد مما إذا كان معتمداً ومسجلاً ضمن القوائم الرسمية.</p>
-        <input id="linkInput" type="url" placeholder="أدخل الرابط (مثال: https://kau.edu.sa)" />
+        <input id="linkInput" type="url" placeholder="أدخل الرابط (مثال: https://www.absher.sa)" />
         <button id="checkLinkBtn" class="btn-primary">فحص ومطابقة الرابط الآن</button>
         <div id="linkResult" style="margin-top:16px; font-weight:bold; font-size:15px;"></div>
       </div>
@@ -281,7 +281,18 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const TRUSTED_DOMAINS = ["kau.edu.sa", "moe.gov.sa", "absher.sa", "najiz.sa", "gov.sa"];
+    // قائمة النطاقات الموثوقة المحدثة والمشاملة للوزارات والمنصات الحكومية
+    const TRUSTED_DOMAINS = [
+      // الوزارات الحكومية
+      "moi.gov.sa", "mofa.gov.sa", "moh.gov.sa", "moe.gov.sa", 
+      "hrsd.gov.sa", "mc.gov.sa", "moj.gov.sa", "mof.gov.sa", 
+      "momrah.gov.sa", "mcit.gov.sa",
+      // المنصات الحكومية الرقمية الأبرز
+      "gov.sa", "absher.sa", "sehaty.sa", "najiz.sa", 
+      "ehsan.sa", "qiwa.sa", "etimad.sa", "balady.gov.sa", 
+      "business.sa", "madrasati.sa", "schools.madrasati.sa",
+    ];
+
     let currentUser = null;
     let confirmationResult = null;
 
@@ -317,10 +328,8 @@
             const stdDev = Math.sqrt(varianceSum / (data.length / 4));
 
             // معايير الفحص الآلي الحقيقي
-            const isBlurred = stdDev < 15; // تباين ضعيف يعني صورة باهتة أو غير واضحة
+            const isBlurred = stdDev < 15; 
             const qualityScore = Math.min(Math.max(stdDev / 80, 0.2), 1.0);
-            
-            // محاكاة كشف التلاعب عبر فحص التباين الحاد غير المنتظم
             const tamperDetected = stdDev > 95 && img.width < 300; 
 
             resolve({
@@ -528,7 +537,6 @@
       uploadMsg.textContent = "جاري تحليل الصورة والتدقيق بالذكاء الاصطناعي...";
 
       try {
-        // فحص حقيقي مبني على تحليل الحواف والبكسلات
         const aiReport = await checkDocumentIntegrity(file);
 
         if (aiReport.is_blurred || aiReport.quality_score < 0.35) {
@@ -566,7 +574,6 @@
       }
     };
 
-    // وظيفة تتبع الطلب عبر رقم الهوية
     document.getElementById("trackBtn").onclick = async () => {
       const natId = document.getElementById("trackNationalId").value.trim();
       const resultContainer = document.getElementById("trackResultContainer");
@@ -616,14 +623,16 @@
       try {
         const urlObj = new URL(val.startsWith("http") ? val : "https://" + val);
         const host = urlObj.hostname.toLowerCase();
+        
+        // التحقق مما إذا كان النطاق يطابق أو ينتهي بأحد النطاقات الموثوقة المدرجة
         const isTrusted = TRUSTED_DOMAINS.some(domain => host === domain || host.endsWith("." + domain));
 
         if(isTrusted) {
           res.style.color = "var(--success)";
-          res.textContent = "✅ الرابط موثوق ومسجل ضمن قائمة الجهات الرسمية المعتمدة (" + host + ")";
+          res.textContent = "✅ الرابط موثوق ومسجل ضمن قائمة الجهات والمنصات الرسمية المعتمدة (" + host + ")";
         } else {
           res.style.color = "var(--danger)";
-          res.textContent = "⚠️ تنبيه: هذا الرابط غير مسجل في قائمة المواقع المعتمدة.";
+          res.textContent = "⚠️ تنبيه: هذا الرابط غير مسجل في قائمة المواقع والمنصات المعتمدة.";
         }
       } catch(e) {
         res.style.color = "var(--danger)";
