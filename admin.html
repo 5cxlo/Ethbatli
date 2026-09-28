@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>لوحة التحكم الإدارية | منصة إثبتلي الرقمية</title>
+  <title>لوحة التحكم الإدارية وصلاحيات المشرفين | إثبتلي</title>
   <style>
     :root {
       --primary-green: #1c422b;
@@ -18,86 +18,60 @@
       --danger: #b42318;
       --success: #15803d;
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-beige); color: var(--text-main); line-height: 1.6; }
-
-    .top-bar { background-color: var(--primary-green); color: #d4e5d8; font-size: 12px; padding: 8px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .top-bar { background-color: var(--primary-green); color: #d4e5d8; font-size: 12px; padding: 8px 24px; display: flex; justify-content: space-between; align-items: center; }
     .main-header { background: #fcfbf9; border-bottom: 2px solid var(--border-color); padding: 16px 24px; }
     .header-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
-    .gov-title h2 { color: var(--primary-green); font-size: 20px; font-weight: 800; margin: 0; }
-    .gov-title p { color: var(--gold-accent); font-size: 13px; font-weight: 600; margin-top: 2px; }
-
-    .content-wrapper { max-width: 1200px; margin: 24px auto; padding: 0 16px; min-height: 550px; }
-
+    .content-wrapper { max-width: 1200px; margin: 24px auto; padding: 0 16px; }
     .card-box { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
-    .card-box h3 { color: var(--primary-green); margin-bottom: 16px; font-size: 18px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
-
-    input, textarea, button { width: 100%; padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 6px; font-family: inherit; font-size: 14px; margin-top: 8px; margin-bottom: 12px; }
+    input, textarea, button { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 6px; font-family: inherit; margin-top: 8px; margin-bottom: 12px; }
     button.btn-primary { background: var(--primary-green); color: #fff; border: 0; font-weight: 700; cursor: pointer; }
-    button.btn-primary:hover { background: var(--accent-green); }
     button.btn-success { background: var(--success); color: #fff; border: 0; font-weight: 700; cursor: pointer; }
     button.btn-danger { background: var(--danger); color: #fff; border: 0; font-weight: 700; cursor: pointer; }
     button.btn-secondary { background: #6b7c6e; color: #fff; border: 0; font-weight: 600; cursor: pointer; }
-
-    .admin-request-card { background: #faf9f6; border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+    .admin-request-card { background: #faf9f6; border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; margin-bottom: 20px; }
     .req-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
-    @media (max-width: 768px) { .req-grid { grid-template-columns: 1fr; } }
-
-    .doc-preview img { max-width: 100%; max-height: 300px; object-fit: contain; border: 1px solid var(--border-color); border-radius: 6px; background: #fff; padding: 5px; }
-    
-    .badge-info { background: var(--light-green); border: 1px solid var(--primary-green); padding: 10px; border-radius: 6px; font-size: 13px; margin-bottom: 10px; }
+    .locked-notice { background: #fff3cd; color: #856404; padding: 10px; border-radius: 6px; font-weight: bold; border: 1px solid #ffeeba; margin-top: 10px; text-align: center; }
+    .role-badge { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold; background: var(--light-green); color: var(--primary-green); border: 1px solid var(--primary-green); margin-bottom: 10px; }
     .hidden { display: none !important; }
-
-    .gov-footer { background: var(--primary-green); color: #d4e5d8; margin-top: 50px; border-top: 4px solid var(--gold-accent); text-align: center; padding: 20px; font-size: 13px; }
+    .gov-footer { background: var(--primary-green); color: #d4e5d8; text-align: center; padding: 20px; margin-top: 40px; font-size: 12px; }
   </style>
 </head>
 <body>
-
   <div class="top-bar">
-    <span>المملكة العربية السعودية | لوحة الإدارة والتدقيق الرقمي</span>
-    <span>نظام المشرفين المعتمد</span>
+    <span>نظام المشرفين الإداري الآمن - منصة إثبتلي</span>
   </div>
 
   <header class="main-header">
     <div class="header-container">
-      <div class="gov-title">
-        <h2>لوحة تحكم المشرفين - إثبتلي</h2>
-        <p>مراجعة الطلبات، التدقيق الجنائي للوثائق، ومنح اعتمادات الأختام الرقمية</p>
-      </div>
-      <button id="adminLogoutBtn" class="btn-secondary hidden" style="width: auto; padding: 8px 16px; margin:0;">تسجيل الخروج</button>
+      <h2>لوحة الإدارة وصلاحيات التدقيق (RBAC)</h2>
+      <button id="adminLogoutBtn" class="btn-secondary hidden" style="width: auto; padding: 8px 16px;">تسجيل الخروج</button>
     </div>
   </header>
 
   <div class="content-wrapper">
-
-    <!-- نافذة تسجيل دخول المشرف -->
     <div id="adminLoginCard" class="card-box">
-      <h3>تسجيل دخول المشرف (Admin Login)</h3>
-      <p style="font-size:13px; color:var(--text-muted); margin-bottom: 12px;">أدخل البريد الإلكتروني وكلمة المرور الخاصة بصلاحيات التدقيق.</p>
-      <input id="adminEmail" type="email" placeholder="بريد المشرف (Admin Email)" />
+      <h3>تسجيل دخول المشرفين المعتمدين</h3>
+      <input id="adminEmail" type="email" placeholder="البريد الإلكتروني الإداري" />
       <input id="adminPassword" type="password" placeholder="كلمة المرور" />
-      <button id="adminLoginBtn" class="btn-primary">دخول إلى لوحة التحكم</button>
-      <div id="adminLoginMsg" style="color:var(--danger); font-weight: bold; margin-top: 8px;"></div>
+      <button id="adminLoginBtn" class="btn-primary">دخول آمن</button>
+      <div id="adminLoginMsg" style="color:var(--danger); font-weight: bold;"></div>
     </div>
 
-    <!-- نافذة عرض الطلبات للمشرف -->
     <div id="adminDashboard" class="card-box hidden">
-      <h3>طلبات المستخدمين الواردة للتدقيق</h3>
-      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">قم بمراجعة تقارير الذكاء الاصطناعي والصور المرفوعة واتخاذ القرار باعتمادها أو رفضها.</p>
+      <div id="adminInfoContainer"></div>
+      <h3>إدارة وقائمة الطلبات الواردة</h3>
       <div id="adminRequestsList"></div>
     </div>
-
   </div>
 
-  <footer class="gov-footer">
-    جميع الحقوق محفوظة © منصة إثبتلي للمصادقة الرقمية 2026 (لوحة المشرفين)
-  </footer>
+  <footer class="gov-footer">جميع الحقوق محفوظة © منصة إثبتلي الرقمية 2026</footer>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
-    import { getFirestore, collection, query, orderBy, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+    import { getFirestore, collection, query, orderBy, onSnapshot, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDj5Hr4ONRDgEJLgRMExcYXnJnrS20ge_k",
@@ -113,134 +87,127 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const adminLoginCard = document.getElementById("adminLoginCard");
-    const adminDashboard = document.getElementById("adminDashboard");
-    const adminLogoutBtn = document.getElementById("adminLogoutBtn");
-    const adminLoginMsg = document.getElementById("adminLoginMsg");
+    let currentAdminRole = "auditor"; // الافتراضي مدقق ميداني
 
-    // تسجيل الدخول كأدمن
     document.getElementById("adminLoginBtn").onclick = async () => {
-      const email = document.getElementById("adminEmail").value.trim();
-      const pass = document.getElementById("adminPassword").value.trim();
-
-      if(!email || !pass) {
-        adminLoginMsg.textContent = "يرجى إدخال البريد وكلمة المرور";
-        return;
-      }
-
       try {
-        await signInWithEmailAndPassword(auth, email, pass);
-        adminLoginMsg.textContent = "";
+        await signInWithEmailAndPassword(auth, document.getElementById("adminEmail").value, document.getElementById("adminPassword").value);
+        document.getElementById("adminLoginMsg").textContent = "";
       } catch (e) {
-        adminLoginMsg.textContent = "فشل تسجيل الدخول: تأكد من الصلاحيات أو البيانات.";
+        document.getElementById("adminLoginMsg").textContent = "فشل المصادقة الإدارية.";
       }
     };
 
-    adminLogoutBtn.onclick = () => signOut(auth);
+    document.getElementById("adminLogoutBtn").onclick = () => signOut(auth);
 
-    // مراقبة حالة تسجيل الدخول للأدمن
-    let unsubAdmin = null;
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       if (user) {
-        adminLoginCard.classList.add("hidden");
-        adminDashboard.classList.remove("hidden");
-        adminLogoutBtn.classList.remove("hidden");
+        document.getElementById("adminLoginCard").classList.add("hidden");
+        document.getElementById("adminDashboard").classList.remove("hidden");
+        document.getElementById("adminLogoutBtn").classList.remove("hidden");
 
-        // جلب الطلبات مباشرة وعرضها للمشرف
-        const q = query(collection(db, "submissions"), orderBy("createdAt", "desc"));
-        if (unsubAdmin) unsubAdmin();
-        
-        unsubAdmin = onSnapshot(q, (snap) => {
-          const listContainer = document.getElementById("adminRequestsList");
-          listContainer.innerHTML = "";
+        // جلب صلاحية المشرف من قاعدة البيانات (مجموعة admins، مستند يحمل الـ uid أو البريد)
+        try {
+          const adminDocRef = doc(db, "admins", user.email);
+          const adminSnap = await getDoc(adminDocRef);
+          if (adminSnap.exists()) {
+            currentAdminRole = adminSnap.data().role || "auditor";
+          } else {
+            currentAdminRole = "auditor"; // لو لم يتم إضافته في قاعدة البيانات يُعامد كمدقق
+          }
+        } catch(err) {
+          currentAdminRole = "auditor";
+        }
 
+        const roleNameAr = currentAdminRole === "super_admin" ? "مشرف عام (Super Admin) - صلاحيات كاملة واعتماد" : "مدقق ميداني (Auditor) - مراجعة وملاحظات فقط";
+        document.getElementById("adminInfoContainer").innerHTML = `<div class="role-badge">صلاحيتك الحالية: ${roleNameAr}</div>`;
+
+        // جلب الطلبات
+        onSnapshot(query(collection(db, "submissions"), orderBy("createdAt", "desc")), (snap) => {
+          const list = document.getElementById("adminRequestsList");
+          list.innerHTML = "";
           snap.forEach((docSnap) => {
             const data = docSnap.data();
             const id = docSnap.id;
-            const isApproved = data.status === "approved";
-            const isRejected = data.status === "rejected";
+            const isProcessed = data.status === "approved" || data.status === "rejected";
 
-            let html = `
+            let actionArea = "";
+            if (isProcessed) {
+              actionArea = `
+                <div class="locked-notice">
+                  🔒 تم اتخاذ قرار نهائي بشأن هذا الطلب (${data.status === 'approved' ? 'معتمد' : 'مرفوض'}) ولا يمكن تعديله.
+                </div>
+                <p style="margin-top:8px;"><b>الرد المسجل:</b> ${data.adminReply || "لا توجد ملاحظات إضافية"}</p>
+              `;
+            } else {
+              // إذا لم يتم البت في الطلب، نتحقق من صلاحية المشرف
+              if (currentAdminRole === "super_admin") {
+                // المشرف العام يمكنه الاعتماد أو الرفض
+                actionArea = `
+                  <textarea id="reply_${id}" placeholder="اكتب ملاحظة أو توجيه للمستخدم هنا...">${data.adminReply || ""}</textarea>
+                  <div style="display:flex; gap:10px;">
+                    <button class="btn-success" onclick="approveDocument('${id}')">اعتماد رسمي وتوليد رقم تسلسلي</button>
+                    <button class="btn-danger" onclick="rejectDocument('${id}')">رفض الطلب</button>
+                  </div>
+                `;
+              } else {
+                // المدقق الميداني يمكنه فقط حفظ ملاحظات دون زر الاعتماد النهائي
+                actionArea = `
+                  <textarea id="reply_${id}" placeholder="اكتب ملاحظاتك الميدانية هنا...">${data.adminReply || ""}</textarea>
+                  <div style="background:#f0f2f5; padding:8px; border-radius:6px; font-size:12px; color:var(--text-muted); text-align:center;">
+                    ⚠️ حسابك (مدقق ميداني): ليس لديك صلاحية الاعتماد النهائي أو إصدار الأرقام التسلسلية.
+                  </div>
+                `;
+              }
+            }
+
+            list.innerHTML += `
               <div class="admin-request-card">
                 <div class="req-grid">
-                  <div class="doc-preview">
-                    <img src="${data.imageUrl}" alt="مستند مرفق" />
-                  </div>
+                  <div><img src="${data.imageUrl}" style="max-width:100%; border-radius:6px;" /></div>
                   <div>
-                    <p><b>اسم المستخدم:</b> ${data.fullName || "-"}</p>
-                    <p><b>رقم الهوية:</b> ${data.universityId || "-"}</p>
+                    <p><b>المستفيد:</b> ${data.fullName || "-"} (${data.universityId || "-"})</p>
                     <p><b>رقم الجوال:</b> ${data.phone || "-"}</p>
-                    <p><b>ملاحظة المتقدم:</b> ${data.note || "-"}</p>
-                    <p><b>الحالة الحالية:</b> ${isApproved ? '<span style="color:var(--success)">معتمد ✅</span>' : (isRejected ? '<span style="color:var(--danger)">مرفوض ❌</span>' : '<span style="color:var(--gold-accent)">قيد الانتظار ⏳</span>')}</p>
-                    <p><b>الرقم التسلسلي (إن وجد):</b> ${data.serialNumber || "لم يصدر بعد"}</p>
-
-                    ${data.aiReport ? `
-                      <div class="badge-info">
-                        <b>تقرير الفحص الآلي:</b><br/>
-                        • جودة الصورة: ${data.aiReport.score}<br/>
-                        • حالة التلاعب: ${data.aiReport.tamperStatus}<br/>
-                        • حالة التوليد: ${data.aiReport.isAiGenerated}
-                      </div>
-                    ` : ''}
-
-                    <div style="margin-top: 10px;">
-                      <textarea id="reply_${id}" placeholder="اكتب ملاحظة أو توجيه للمستخدم هنا...">${data.adminReply || ""}</textarea>
-                      <div style="display:flex; gap:10px; margin-top:8px;">
-                        <button class="btn-success" onclick="approveDoc('${id}')">اعتماد وإصدار ختم ورقم تسلسلي</button>
-                        <button class="btn-danger" onclick="rejectDoc('${id}')">رفض المستند</button>
-                      </div>
-                    </div>
+                    <p><b>ملاحظة المتقدم:</b> ${data.note || "لا توجد ملاحظات"}</p>
+                    <p><b>الحالة الحالية:</b> <span style="color:${data.status === 'approved' ? 'var(--success)' : (data.status === 'rejected' ? 'var(--danger)' : 'var(--gold-accent)}')">${data.status === 'approved' ? 'معتمد ✅' : (data.status === 'rejected' ? 'مرفوض ❌' : 'قيد الانتظار ⏳')}</span></p>
+                    <p><b>الرقم التسلسلي:</b> ${data.serialNumber || "لم يصدر بعد"}</p>
+                    ${actionArea}
                   </div>
                 </div>
-              </div>
-            `;
-            listContainer.innerHTML += html;
+              </div>`;
           });
-
-          if(snap.empty) {
-            listContainer.innerHTML = "<p style='color:var(--text-muted);'>لا توجد طلبات مرفوعة حتى الآن.</p>";
-          }
         });
-
       } else {
-        adminLoginCard.classList.remove("hidden");
-        adminDashboard.classList.add("hidden");
-        adminLogoutBtn.classList.add("hidden");
-        if (unsubAdmin) unsubAdmin();
+        document.getElementById("adminLoginCard").classList.remove("hidden");
+        document.getElementById("adminDashboard").classList.add("hidden");
+        document.getElementById("adminLogoutBtn").classList.add("hidden");
       }
     });
 
-    // دالة اعتماد المستند وتوليد الرقم التسلسلي تلقائياً
-    window.approveDoc = async (id) => {
-      const replyText = document.getElementById(`reply_${id}`).value;
-      const randomCode = Math.floor(100000 + Math.random() * 900000);
-      const serialNumber = `ETH-2026-${randomCode}`;
-
-      try {
-        await updateDoc(doc(db, "submissions", id), {
-          status: "approved",
-          serialNumber: serialNumber,
-          adminReply: replyText || "تم تدقيق واعتماد المستند بنجاح."
-        });
-        alert("تم الاعتماد بنجاح وتوليد الرقم التسلسلي: " + serialNumber);
-      } catch(e) {
-        alert("حدث خطأ أثناء الاعتماد: " + e.message);
+    window.approveDocument = async (id) => {
+      if (currentAdminRole !== "super_admin") {
+        alert("عذراً، لا تمتلك الصلاحية الكافية (مطلوب مشرف عام).");
+        return;
       }
+      const serialNumber = `ETH-2026-${Math.floor(100000 + Math.random() * 900000)}`;
+      await updateDoc(doc(db, "submissions", id), {
+        status: "approved",
+        serialNumber: serialNumber,
+        adminReply: document.getElementById(`reply_${id}`).value || "تم تدقيق واعتماد المستند بنجاح."
+      });
+      alert("تم اعتماد الطلب نهائياً وتوليد الرقم التسلسلي بنجاح.");
     };
 
-    // دالة رفض المستند
-    window.rejectDoc = async (id) => {
-      const replyText = document.getElementById(`reply_${id}`).value;
-
-      try {
-        await updateDoc(doc(db, "submissions", id), {
-          status: "rejected",
-          adminReply: replyText || "عذراً، تم رفض المستند لعدم مطابقة الشروط أو عدم وضوح البيانات."
-        });
-        alert("تم رفض الطلب بنجاح.");
-      } catch(e) {
-        alert("حدث خطأ أثناء الرفض: " + e.message);
+    window.rejectDocument = async (id) => {
+      if (currentAdminRole !== "super_admin") {
+        alert("عذراً، لا تمتلك الصلاحية الكافية (مطلوب مشرف عام).");
+        return;
       }
+      await updateDoc(doc(db, "submissions", id), {
+        status: "rejected",
+        adminReply: document.getElementById(`reply_${id}`).value || "عذراً، تم رفض المستند لعدم مطابقة الشروط."
+      });
+      alert("تم رفض الطلب نهائياً وإغلاق سجله.");
     };
   </script>
 </body>
