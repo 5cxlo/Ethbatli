@@ -99,7 +99,6 @@
     const db = getFirestore(app);
 
     async function verifyDocument() {
-      // قراءة الرقم التسلسلي من رابط الصفحة (مثلاً: verify.html?serial=ETH-2026-XXXXX)
       const urlParams = new URLSearchParams(window.location.search);
       const serialNumber = urlParams.get('serial');
 
@@ -116,7 +115,6 @@
       }
 
       try {
-        // البحث عن المستند في قاعدة البيانات باستخدام الرقم التسلسلي والحالة "approved" فقط
         const q = query(
           collection(db, "submissions"), 
           where("serialNumber", "==", serialNumber),
@@ -124,28 +122,23 @@
         );
 
         const querySnapshot = await getDocs(q);
-
         loadingBox.style.display = 'none';
 
         if (!querySnapshot.empty) {
-          // وجدنا مستند مطابق وصحيح
           const docData = querySnapshot.docs[0].data();
-          
           successBox.style.display = 'block';
           detailsBox.style.display = 'block';
 
           document.getElementById('resSerial').innerText = docData.serialNumber || serialNumber;
           document.getElementById('resName').innerText = docData.fullName || "مفوض رسمي";
           
-          // معالجة التاريخ والوقت لعرضه بشكل واضح
           let dateStr = "مستند رسمي معتمد";
-          if (docData.updatedAt) {
-            dateStr = new Date(docData.updatedAt).toLocaleString('ar-SA');
+          if (docData.createdAt) {
+            dateStr = docData.createdAt.toDate ? docData.createdAt.toDate().toLocaleString('ar-SA') : "مستند رسمي معتمد";
           }
           document.getElementById('resDate').innerText = dateStr;
 
         } else {
-          // لم يتم العثور على المستند أو غير معتمد
           errorBox.style.display = 'block';
         }
 
@@ -157,7 +150,6 @@
       }
     }
 
-    // تنفيذ التحقق فور تحميل الصفحة
     window.addEventListener('DOMContentLoaded', verifyDocument);
   </script>
 </body>
