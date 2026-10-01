@@ -603,7 +603,7 @@
       uploadMsg.textContent = "جاري تحليل الصورة والتدقيق بالذكاء الاصطناعي...";
 
       try {
-        const aiReport = await checkDocumentIntegrity(file);
+      const aiReport = await advancedDocumentIntegrityCheck(file);
 
         if (aiReport.is_blurred || aiReport.quality_score < 0.35) {
           uploadMsg.style.color = "var(--danger)";
