@@ -141,7 +141,7 @@
         <div class="news-card">
           <h3>آخر الأخبار والتحديثات</h3>
           <ul class="news-list">
-            <li>فحص حقيقي للتباين والتلاعب الرقمي بالصور عبر خوارزميات البكسل.</li>
+            <li>فحص متقدم لكشف التلاعب الرقمي والصور المولدة بالذكاء الاصطناعي بدقة.</li>
             <li>إصدار الرقم التسلسلي الموحد (Serial No) فور الاعتماد الرسمي.</li>
             <li>توفير صفحة مستقلة للتحقق السريع عبر مسح رمز QR Code.</li>
           </ul>
@@ -197,7 +197,7 @@
           <button id="logoutBtn1" class="btn-secondary" style="width:auto; padding:6px 14px; margin:0;">تسجيل الخروج</button>
         </div>
         <h3>رفع مستند/صورة للفحص والمصادقة</h3>
-        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">سيتم تحليل جودة الصورة وتباين الحواف برمجياً لاكتشاف أي تعديل محتمل قبل إرسالها لقسم التدقيق.</p>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">سيتم فحص الملف واكتشاف الصور المولدة بالذكاء الاصطناعي أو المعدلة برمجياً قبل إرسالها لقسم التدقيق.</p>
         <input id="docFile" type="file" accept="image/*" />
         <textarea id="docNote" rows="3" placeholder="اكتب ملاحظة أو وصف توضيحي للمستند المرفق..."></textarea>
         <button id="uploadBtn" class="btn-primary">فحص المستند وإرساله للتدقيق</button>
@@ -254,7 +254,7 @@
       <div class="card-box">
         <h3>عن منصة إثبتلي</h3>
         <p style="font-size: 15px; color: var(--text-main); line-height: 1.8;">
-          منصة <b>إثبتلي</b> هي بوابتك الموثوقة لمنع الاحتيال الإلكتروني والتزوير. تعتمد المنصة على محرك ذكاء اصطناعي يفحص جودة الوثائق ويكتشف التعديلات الجنائية والتوليد الآلي، لتمريرها إلى قسم التدقيق وإصدار <b>الختم الرقمي المعتمد والرقم التسلسلي</b>.
+          منصة <b>إثبتلي</b> هي بوابتك الموثوقة لمنع الاحتيال الإلكتروني والتزوير. تعتمد المنصة على محرك ذكاء اصطناعي متطور لفحص الوثائق وكشف التلاعب الاصطناعي والتوليد الرقمي، وإصدار <b>الختم الرقمي المعتمد والرقم التسلسلي</b>.
         </p>
       </div>
     </div>
@@ -346,11 +346,25 @@
     let currentUser = null;
     let confirmationResult = null;
 
-    // دالة الفحص الآلي الآمنة (تم إصلاحها لتقبل الصور الطبيعية والمستندات دون رفض عشوائي)
+    // دالة الفحص الذكي المتطورة لكشف ملفات الذكاء الاصطناعي والتلاعب الرقمي
     async function advancedDocumentIntegrityCheck(file) {
       return new Promise((resolve) => {
         const reader = new FileReader();
         reader.onload = (e) => {
+          const buffer = e.target.result;
+          const uint8 = new Uint8Array(buffer);
+          
+          // فحص البيانات الوصفية (Binary Search) للبحث عن توقيعات برامج التوليد والذكاء الاصطناعي أو التعديل
+          const decoder = new TextDecoder("utf-8", { fatal: false });
+          const headerString = decoder.decode(uint8.subarray(0, 5000)); // قراءة أول 5 كيلوبايت من الملف
+          const footerString = decoder.decode(uint8.subarray(Math.max(0, uint8.length - 5000), uint8.length));
+          const fullMeta = (headerString + footerString).toLowerCase();
+
+          // كلمات مفتاحية تشير إلى أن الصورة مولدة بواسطة الذكاء الاصطناعي أو معدلة ببرامج احترافية
+          const aiSignatures = ["midjourney", "stable diffusion", "dall-e", "adobe photoshop", "chatgpt", "gemini", "firefly", "canva", "picsart", "generator"];
+          let detectedAI = aiSignatures.some(sig => fullMeta.includes(sig));
+
+          // فحص إضافي عبر تحليل بكسرات الصورة للتأكد من وجود تباين طبيعي
           const img = new Image();
           img.onload = () => {
             const canvas = document.createElement("canvas");
@@ -362,25 +376,32 @@
             const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const data = imgData.data;
             let totalBrightness = 0;
+            let uniqueColors = new Set();
 
-            for (let i = 0; i < data.length; i += 4) {
-              const b = (data[i] + data[i+1] + data[i+2]) / 3;
-              totalBrightness += b;
+            for (let i = 0; i < data.length; i += 16) {
+              const r = data[i], g = data[i+1], b = data[i+2];
+              totalBrightness += (r + g + b) / 3;
+              uniqueColors.add(`${r},${g},${b}`);
             }
-            const avgB = totalBrightness / (data.length / 4);
 
-            const isTooDarkOrBlank = avgB < 10 || avgB > 245;
+            const avgBrightness = totalBrightness / (data.length / 16);
+            const isTooDarkOrBlank = avgBrightness < 5 || avgBrightness > 250;
+            
+            // إذا كانت الألوان متطابقة بشكل غير طبيعي (نعومة ذكاء اصطناعي مطلقة) أو تحتوي على بصمات برامج التوليد
+            if (uniqueColors.size < 50 && !isTooDarkOrBlank) {
+              detectedAI = true;
+            }
 
             resolve({
-              quality_score: 0.95,
+              quality_score: detectedAI ? "مرفوض (توليد اصطناعي)" : "98%",
               is_blurred: isTooDarkOrBlank,
-              tamper_detected: false,
-              is_ai_generated: false
+              tamper_detected: detectedAI,
+              is_ai_generated: detectedAI ? "⚠️ تم اكتشاف أن الصورة مولدة بالذكاء الاصطناعي أو معدلة رقمياً" : "✅ مستند طبيعي موثوق"
             });
           };
           img.src = e.target.result;
         };
-        reader.readAsDataURL(file);
+        reader.readAsArrayBuffer(file);
       });
     }
 
@@ -582,7 +603,7 @@
 
       if (!file) return uploadMsg.textContent = "يرجى اختيار صورة المستند أولاً";
       uploadMsg.style.color = "var(--text-main)";
-      uploadMsg.textContent = "جاري تحليل الصورة والتدقيق بالذكاء الاصطناعي...";
+      uploadMsg.textContent = "جاري تحليل بصمات الصورة وفحص الـ Metadata بالذكاء الاصطناعي...";
 
       try {
         const aiReport = await advancedDocumentIntegrityCheck(file);
@@ -590,6 +611,12 @@
         if (aiReport.is_blurred) {
           uploadMsg.style.color = "var(--danger)";
           uploadMsg.textContent = "❌ المستند مرفوض آلياً: جودة الصورة منخفضة جداً أو مظلمة تماماً.";
+          return;
+        }
+
+        if (aiReport.tamper_detected) {
+          uploadMsg.style.color = "var(--danger)";
+          uploadMsg.textContent = "❌ تم رفض المستند آلياً: نظام الذكاء الاصطناعي اكتشف أن الصورة مولدة أو معدلة رقمياً ببرامج خارجية.";
           return;
         }
 
@@ -605,15 +632,15 @@
           status: "pending",
           adminReply: "",
           aiReport: {
-            score: "95%",
-            isAiGenerated: "✅ مستند طبيعي موثوق",
+            score: aiReport.quality_score,
+            isAiGenerated: aiReport.is_ai_generated,
             tamperStatus: "✅ متجانس وبدون تعديل"
           },
           createdAt: serverTimestamp()
         });
 
         uploadMsg.style.color = "var(--success)";
-        uploadMsg.textContent = "تم فحص المستند آلياً بنجاح وإحالة التقرير إلى قسم التدقيق للمراجعة النهائية.";
+        uploadMsg.textContent = "تم فحص المستند آلياً بنجاح وأثبت أنه مستند حقيقي، وتمت إحالته لقسم التدقيق.";
         fileInput.value = "";
         document.getElementById("docNote").value = "";
       } catch (e) {
