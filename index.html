@@ -305,7 +305,6 @@
         badge.style.background = "#eaf1ec";
         badge.style.color = "#1c422b";
       }
-      loadAdminSubmissions();
     };
 
     window.approveDocument = async (id) => {
@@ -359,7 +358,6 @@
             canvas.height = img.height;
             ctx.drawImage(img, 0, 0);
 
-            // فحص خفيف وسريع جداً لسطوع الصورة لتجنب تعليق المتصفح
             const sampleData = ctx.getImageData(0, 0, Math.min(canvas.width, 100), Math.min(canvas.height, 100)).data;
             let totalBrightness = 0;
             for (let i = 0; i < sampleData.length; i += 4) {
@@ -378,60 +376,6 @@
           img.src = e.target.result;
         };
         reader.readAsDataURL(file);
-      });
-    }
-
-          const buffer = e.target.result;
-          const uint8 = new Uint8Array(buffer);
-          
-          // فحص البيانات الوصفية (Binary Search) للبحث عن توقيعات برامج التوليد والذكاء الاصطناعي أو التعديل
-          const decoder = new TextDecoder("utf-8", { fatal: false });
-          const headerString = decoder.decode(uint8.subarray(0, 5000)); // قراءة أول 5 كيلوبايت من الملف
-          const footerString = decoder.decode(uint8.subarray(Math.max(0, uint8.length - 5000), uint8.length));
-          const fullMeta = (headerString + footerString).toLowerCase();
-
-          // كلمات مفتاحية تشير إلى أن الصورة مولدة بواسطة الذكاء الاصطناعي أو معدلة ببرامج احترافية
-          const aiSignatures = ["midjourney", "stable diffusion", "dall-e", "adobe photoshop", "chatgpt", "gemini", "firefly", "canva", "picsart", "generator"];
-          let detectedAI = aiSignatures.some(sig => fullMeta.includes(sig));
-
-          // فحص إضافي عبر تحليل بكسرات الصورة للتأكد من وجود تباين طبيعي
-          const img = new Image();
-          img.onload = () => {
-            const canvas = document.createElement("canvas");
-            const ctx = canvas.getContext("2d");
-            canvas.width = img.width;
-            canvas.height = img.height;
-            ctx.drawImage(img, 0, 0);
-
-            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const data = imgData.data;
-            let totalBrightness = 0;
-            let uniqueColors = new Set();
-
-            for (let i = 0; i < data.length; i += 16) {
-              const r = data[i], g = data[i+1], b = data[i+2];
-              totalBrightness += (r + g + b) / 3;
-              uniqueColors.add(`${r},${g},${b}`);
-            }
-
-            const avgBrightness = totalBrightness / (data.length / 16);
-            const isTooDarkOrBlank = avgBrightness < 5 || avgBrightness > 250;
-            
-            // إذا كانت الألوان متطابقة بشكل غير طبيعي (نعومة ذكاء اصطناعي مطلقة) أو تحتوي على بصمات برامج التوليد
-            if (uniqueColors.size < 50 && !isTooDarkOrBlank) {
-              detectedAI = true;
-            }
-
-            resolve({
-              quality_score: detectedAI ? "مرفوض (توليد اصطناعي)" : "98%",
-              is_blurred: isTooDarkOrBlank,
-              tamper_detected: detectedAI,
-              is_ai_generated: detectedAI ? "⚠️ تم اكتشاف أن الصورة مولدة بالذكاء الاصطناعي أو معدلة رقمياً" : "✅ مستند طبيعي موثوق"
-            });
-          };
-          img.src = e.target.result;
-        };
-        reader.readAsArrayBuffer(file);
       });
     }
 
@@ -475,6 +419,7 @@
 
     document.getElementById("sendCodeBtn").onclick = async () => {
       let ph = document.getElementById("phone").value.trim();
+      const authMsg = document.getElementById("authMsg");
       if (!ph) return authMsg.textContent = "يرجى إدخال رقم الجوال أولاً";
       if (!ph.startsWith("+")) {
         if (ph.startsWith("0")) ph = ph.substring(1);
@@ -491,6 +436,7 @@
 
     document.getElementById("verifyOtpBtn").onclick = async () => {
       const code = document.getElementById("otpCode").value;
+      const authMsg = document.getElementById("authMsg");
       try { 
         await confirmationResult.confirm(code); 
         authMsg.textContent = "";
@@ -630,6 +576,7 @@
       const fileInput = document.getElementById("docFile");
       const file = fileInput.files[0];
       const note = document.getElementById("docNote").value;
+      const uploadMsg = document.getElementById("uploadMsg");
 
       if (!file) return uploadMsg.textContent = "يرجى اختيار صورة المستند أولاً";
       uploadMsg.style.color = "var(--text-main)";
