@@ -231,14 +231,24 @@
     <!-- نافذة: طلباتي -->
     <div id="requestsTab" class="tab-content hidden">
       <div id="requestsListCard" class="card-box hidden">
+<div style="margin-bottom: 15px;">
+  <label style="font-weight:bold; font-size:13px;">اختر دورك الوظيفي الحالي بالمحاكاة:</label>
+  <select id="adminRoleSelect" onchange="updateAdminRoleUI()">
+    <option value="auditor">مدقق ميداني (Auditor - مراجعة وتدوين فقط)</option>
+    <option value="super_admin">مشرف عام (Super Admin - اعتماد وحذف شامل)</option>
+  </select>
+</div>
+<div id="adminRoleBadge" class="badge-role" style="display:inline-block; padding:4px 8px; font-size:12px; font-weight:bold; border-radius:4px; background:#eaf1ec; color:#1c422b; margin-bottom:10px;">الدور الحالي: مدقق ميداني</div>
+
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <span id="whoRequests" style="font-weight: bold; color: var(--primary-green);"></span>
           <button id="logoutBtn2" class="btn-secondary" style="width:auto; padding:6px 14px; margin:0;">تسجيل الخروج</button>
         </div>
+        
         <h3>سجل المستندات المفحوصة والمصادق عليها</h3>
         <div id="list"></div>
       </div>
-    </div>
+    </div>div>
 
     <!-- نافذة: عن المنصة -->
     <div id="aboutTab" class="tab-content hidden">
@@ -281,6 +291,62 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+    // توليد رقم تسلسلي مشفر وفريد لمنع التداخل أو التكرار
+    function generateSecureSerialNumber() {
+      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      let serial = "ETHB-";
+      for (let i = 0; i < 10; i++) {
+        serial += chars.charAt(Math.floor(Math.random() * chars.length));
+        if (i === 4) serial += "-";
+      }
+      return serial;
+    }
+
+    let currentAdminRole = "auditor"; // الافتراضي مدقق ميداني
+
+    window.updateAdminRoleUI = () => {
+      currentAdminRole = document.getElementById("adminRoleSelect").value;
+      const badge = document.getElementById("adminRoleBadge");
+      if (currentAdminRole === "super_admin") {
+        badge.textContent = "الدور الحالي: مشرف عام (Super Admin - صلاحيات كاملة)";
+        badge.style.background = "#dcfce7";
+        badge.style.color = "#15803d";
+      } else {
+        badge.textContent = "الدور الحالي: مدقق ميداني (Auditor - مراجعة وتوجيه فقط)";
+        badge.style.background = "#eaf1ec";
+        badge.style.color = "#1c422b";
+      }
+      loadAdminSubmissions(); // تحديث القائمة بناءً على الصلاحية
+    };
+
+    window.approveDocument = async (id) => {
+      if (currentAdminRole !== "super_admin") {
+        alert("عذراً، صلاحياتك الحالية (مدقق ميداني) لا تسمح بالاعتماد النهائي!");
+        return;
+      }
+      await updateDoc(doc(db, "submissions", id), { status: "approved" });
+      alert("تم اعتماد المستند بنجاح.");
+      loadAdminSubmissions();
+    };
+
+    window.deleteDocumentRecord = async (id) => {
+      if (currentAdminRole !== "super_admin") {
+        alert("عملية محظورة: الحذف مقتصر حصرياً على المشرف العام (Super Admin).");
+        return;
+      }
+      if (confirm("هل أنت متأكد من حذف هذا السجل نهائياً؟")) {
+        await deleteDoc(doc(db, "submissions", id));
+        alert("تم الحذف بنجاح.");
+        loadAdminSubmissions();
+      }
+    };
+
+    window.saveAuditorNote = async (id) => {
+      const noteText = document.getElementById(`reply_${id}`).value;
+      await updateDoc(doc(db, "submissions", id), { adminReply: noteText });
+      alert("تم حفظ توجيه المدقق بنجاح.");
+      loadAdminSubmissions();
+    };
 
     // قائمة النطاقات الموثوقة المحدثة والمشاملة للوزارات والمنصات الحكومية
     const TRUSTED_DOMAINS = [
@@ -299,8 +365,8 @@
     let currentUser = null;
     let confirmationResult = null;
 
-    // محرك الفحص الحقيقي للصور (تحليل الأبعاد، الحواف والتباين للبكسلات للكشف عن التلاعب)
-    async function checkDocumentIntegrity(file) {
+    // خوارزمية محسنة لفحص الصور المتقدمة واكتشاف حواف التلاعب والتشويش
+    async function advancedDocumentIntegrityCheck(file) {
       return new Promise((resolve) => {
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -312,33 +378,30 @@
             canvas.height = img.height;
             ctx.drawImage(img, 0, 0);
 
-            // تحليل بكسلات الصورة للتحقق من التشويش وتباين التعديل
             const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const data = imgData.data;
-            let totalBrightness = 0;
-            let varianceSum = 0;
+            let totalBrightness = 0, edgeScore = 0;
 
             for (let i = 0; i < data.length; i += 4) {
-              const brightness = (data[i] + data[i+1] + data[i+2]) / 3;
-              totalBrightness += brightness;
+              const b = (data[i] + data[i+1] + data[i+2]) / 3;
+              totalBrightness += b;
             }
-            const avgBrightness = totalBrightness / (data.length / 4);
+            const avgB = totalBrightness / (data.length / 4);
 
-            for (let i = 0; i < data.length; i += 4) {
-              const brightness = (data[i] + data[i+1] + data[i+2]) / 3;
-              varianceSum += Math.pow(brightness - avgBrightness, 2);
+            // قياس تباين حواف الصورة لاكتشاف القص أو التعديل
+            for (let i = 4; i < data.length - 4; i += 4) {
+              const currentB = (data[i] + data[i+1] + data[i+2]) / 3;
+              const prevB = (data[i-4] + data[i-3] + data[i-2]) / 3;
+              if (Math.abs(currentB - prevB) > 40) edgeScore++;
             }
-            const stdDev = Math.sqrt(varianceSum / (data.length / 4));
 
-            // معايير الفحص الآلي الحقيقي
-            const isBlurred = stdDev < 15; 
-            const qualityScore = Math.min(Math.max(stdDev / 80, 0.2), 1.0);
-            const tamperDetected = stdDev > 95 && img.width < 300; 
+            const qualityScore = Math.min(Math.max(edgeScore / (canvas.width * canvas.height * 0.1), 0.1), 1.0);
+            const isBlurred = avgB < 25 || avgB > 235;
+            const tamperDetected = edgeScore > (canvas.width * canvas.height * 0.4);
 
             resolve({
               quality_score: qualityScore,
               is_blurred: isBlurred,
-              is_ai_generated: false,
               tamper_detected: tamperDetected
             });
           };
