@@ -440,13 +440,17 @@
       }
     }
 
-    window.onload = () => {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 
-  size: 'normal',
-  'callback': (response) => {
-    // تم التحقق بنجاح
+window.onload = () => {
+  try {
+    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 
+      size: 'normal' 
+    });
+    window.recaptchaVerifier.render();
+  } catch (e) {
+    console.error("Recaptcha error:", e);
   }
-});
+};
+
 
     document.getElementById("sendCodeBtn").onclick = async () => {
   let ph = document.getElementById("phone").value.trim();
