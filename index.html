@@ -445,16 +445,24 @@
     };
 
     document.getElementById("sendCodeBtn").onclick = async () => {
-      const ph = document.getElementById("phone").value;
-      if(!ph) return authMsg.textContent = "يرجى إدخال رقم الجوال أولاً";
-      try {
-        confirmationResult = await signInWithPhoneNumber(auth, ph, window.recaptchaVerifier);
-        document.getElementById("otpSection").classList.remove("hidden");
-        authMsg.textContent = "تم إرسال رمز التحقق إلى جوالك";
-      } catch (e) {
-        authMsg.textContent = "خطأ في الإرسال: " + e.message;
-      }
-    };
+  let ph = document.getElementById("phone").value.trim();
+  if (!ph) return authMsg.textContent = "يرجى إدخال رقم الجوال أولاً";
+  
+  if (!ph.startsWith("+")) {
+    if (ph.startsWith("0")) {
+      ph = ph.substring(1);
+    }
+    ph = "+966" + ph;
+  }
+
+  try {
+    confirmationResult = await signInWithPhoneNumber(auth, ph, window.recaptchaVerifier);
+    document.getElementById("otpSection").classList.remove("hidden");
+    authMsg.textContent = "تم إرسال رمز التحقق إلى جوالك";
+  } catch (e) {
+    authMsg.textContent = "خطأ في الإرسال: " + e.message;
+  }
+};
 
     document.getElementById("verifyOtpBtn").onclick = async () => {
       const code = document.getElementById("otpCode").value;
