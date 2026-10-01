@@ -441,8 +441,12 @@
     }
 
     window.onload = () => {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { size: 'invisible' });
-    };
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 
+  size: 'normal',
+  'callback': (response) => {
+    // تم التحقق بنجاح
+  }
+});
 
     document.getElementById("sendCodeBtn").onclick = async () => {
   let ph = document.getElementById("phone").value.trim();
