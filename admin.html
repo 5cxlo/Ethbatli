@@ -69,9 +69,21 @@
   <footer class="gov-footer">جميع الحقوق محفوظة © منصة إثبتلي الرقمية 2026</footer>
 
   <script type="module">
+
+
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
     import { getFirestore, collection, query, orderBy, onSnapshot, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+// توليد رقم تسلسلي مشفر وفريد متطابق مع النظام
+function generateSecureSerialNumber() {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let serial = "ETHB-";
+  for (let i = 0; i < 10; i++) {
+    serial += chars.charAt(Math.floor(Math.random() * chars.length));
+    if (i === 4) serial += "-";
+  }
+  return serial;
+}
 
     const firebaseConfig = {
       apiKey: "AIzaSyDj5Hr4ONRDgEJLgRMExcYXnJnrS20ge_k",
@@ -189,7 +201,7 @@
         alert("عذراً، لا تمتلك الصلاحية الكافية (مطلوب مشرف عام).");
         return;
       }
-      const serialNumber = `ETH-2026-${Math.floor(100000 + Math.random() * 900000)}`;
+     const serialNumber = generateSecureSerialNumber();
       await updateDoc(doc(db, "submissions", id), {
         status: "approved",
         serialNumber: serialNumber,
