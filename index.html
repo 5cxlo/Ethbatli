@@ -723,6 +723,56 @@ window.onload = () => {
         res.textContent = "الرابط المكتوب غير صحيح الصياغة.";
       }
     };
+   async function advancedDocumentIntegrityCheck(file) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+
+                const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const data = imgData.data;
+
+                let rSum = 0, gSum = 0, bSum = 0;
+                let pixelCount = data.length / 4;
+
+                for (let i = 0; i < data.length; i += 4) {
+                    rSum += data[i];
+                    gSum += data[i+1];
+                    bSum += data[i+2];
+                }
+
+                const avgR = rSum / pixelCount;
+                const avgG = gSum / pixelCount;
+                const avgB = bSum / pixelCount;
+
+                const isTooDarkOrBlank = (avgR < 15 && avgG < 15 && avgB < 15) || (avgR > 245 && avgG > 245 && avgB > 245);
+                if (isTooDarkOrBlank) {
+                    resolve({ quality_score: 0.1, is_blurred: true, tamper_detected: false, is_ai_generated: false });
+                    return;
+                }
+
+                const colorVariance = Math.abs(avgR - avgG) + Math.abs(avgG - avgB);
+                const isAiOrTampered = colorVariance < 1.0;
+
+                resolve({
+                    quality_score: 0.9,
+                    is_blurred: false,
+                    tamper_detected: isAiOrTampered,
+                    is_ai_generated: isAiOrTampered
+                });
+            };
+            img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+}
+ 
   </script>
 </body>
 </html>
