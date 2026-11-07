@@ -378,8 +378,8 @@ async function advancedDocumentIntegrityCheck(file) {
     const result = await response.json();
 console.log("نتيجة Sightengine:", result);
     if (result.status === "success") {
-      const isAI = (result.genai?.prob > 0.2) || (result.deepfake?.prob > 0.2);
-      const isLowQuality = result.quality?.score < 0.4;
+      const isAI = (result.genai?.prob > 0.05) || (result.deepfake?.prob > 0.05);
+      const isLowQuality = result.quality?.score < 0.7;
 
       if (isAI || isLowQuality) {
         return {
