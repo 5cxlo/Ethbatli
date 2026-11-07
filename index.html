@@ -324,7 +324,7 @@
                   <img src="${x.imageUrl}" alt="المستند" />
                   ${isApproved ? `
                     <div class="official-stamp-overlay">
-                     <img src="./stamp.png" alt="ختم" style="width:60px; height:60px; object-fit:contain;" />
+                    <img src="stamp.png" alt="ختم" style="width:60px; height:60px; object-fit:contain;" />
                       <div class="stamp-text">
                         <b>منصة أثبت لي</b><br/>
                         موثق ومعتمد<br/>
@@ -425,7 +425,7 @@
         uploadMsg.style.color = "var(--danger)";
         uploadMsg.textContent = "خطأ أثناء المعالجة: " + e.message;
       }
-    };
+    };ك
     document.getElementById("trackBtn").onclick = async () => {
       const natId = document.getElementById("trackNationalId").value.trim();
       const resultContainer = document.getElementById("trackResultContainer");
