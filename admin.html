@@ -69,7 +69,7 @@
   <footer class="gov-footer">جميع الحقوق محفوظة © منصة أثبت لي 2026</footer>
 
   <script type="module">
-    alert("الكود اشتغل - إذا شفت هذا التنبيه يعني الجافاسكريبت شغال");
+    alert("الكود اشتغل");
 
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
@@ -102,15 +102,17 @@
     let currentAdminRole = "auditor";
 
     document.getElementById("adminLoginBtn").onclick = async () => {
-      alert("الزر اشتغل");
+      alert("1 - الزر اشتغل");
+      const email = document.getElementById("adminEmail").value;
+      const password = document.getElementById("adminPassword").value;
+      alert("2 - الإيميل: " + email);
       try {
-        const email = document.getElementById("adminEmail").value;
-        const password = document.getElementById("adminPassword").value;
+        alert("3 - جاري تسجيل الدخول");
         await signInWithEmailAndPassword(auth, email, password);
-        document.getElementById("adminLoginMsg").textContent = "";
+        alert("4 - نجح تسجيل الدخول");
       } catch (e) {
-        document.getElementById("adminLoginMsg").textContent = "فشل تسجيل الدخول: " + e.message;
-        alert("خطأ: " + e.message);
+        alert("5 - خطأ: " + e.message);
+        document.getElementById("adminLoginMsg").textContent = "فشل: " + e.message;
       }
     };
 
@@ -128,9 +130,7 @@
           if (adminSnap.exists()) {
             currentAdminRole = adminSnap.data().role || "auditor";
           }
-        } catch(err) {
-          console.error(err);
-        }
+        } catch(err) {}
 
         const roleNameAr = currentAdminRole === "super_admin" ? "مشرف عام" : "مدقق ميداني";
         document.getElementById("adminInfoContainer").innerHTML = `<div class="role-badge">صلاحيتك: ${roleNameAr}</div>`;
