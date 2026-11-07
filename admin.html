@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>لوحة التحكم الإدارية وصلاحيات المشرفين | إثبتلي</title>
+  <title>لوحة التحكم الإدارية | أثبت لي</title>
   <style>
     :root {
       --primary-green: #1c422b;
@@ -40,50 +40,50 @@
 </head>
 <body>
   <div class="top-bar">
-    <span>نظام المشرفين الإداري الآمن - منصة إثبتلي</span>
+    <span>نظام المشرفين الإداري - منصة أثبت لي</span>
   </div>
 
   <header class="main-header">
     <div class="header-container">
-      <h2>لوحة الإدارة وصلاحيات التدقيق (RBAC)</h2>
+      <h2>لوحة الإدارة وصلاحيات التدقيق</h2>
       <button id="adminLogoutBtn" class="btn-secondary hidden" style="width: auto; padding: 8px 16px;">تسجيل الخروج</button>
     </div>
   </header>
 
   <div class="content-wrapper">
     <div id="adminLoginCard" class="card-box">
-      <h3>تسجيل دخول المشرفين المعتمدين</h3>
-      <input id="adminEmail" type="email" placeholder="البريد الإلكتروني الإداري" />
+      <h3>تسجيل دخول المشرفين</h3>
+      <input id="adminEmail" type="email" placeholder="البريد الإلكتروني" />
       <input id="adminPassword" type="password" placeholder="كلمة المرور" />
-      <button id="adminLoginBtn" class="btn-primary">دخول آمن</button>
+      <button id="adminLoginBtn" class="btn-primary">دخول</button>
       <div id="adminLoginMsg" style="color:var(--danger); font-weight: bold;"></div>
     </div>
 
     <div id="adminDashboard" class="card-box hidden">
       <div id="adminInfoContainer"></div>
-      <h3>إدارة وقائمة الطلبات الواردة</h3>
+      <h3>قائمة الطلبات</h3>
       <div id="adminRequestsList"></div>
     </div>
   </div>
 
-  <footer class="gov-footer">جميع الحقوق محفوظة © منصة إثبتلي الرقمية 2026</footer>
+  <footer class="gov-footer">جميع الحقوق محفوظة © منصة أثبت لي 2026</footer>
 
   <script type="module">
-
+    alert("الكود اشتغل - إذا شفت هذا التنبيه يعني الجافاسكريبت شغال");
 
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
     import { getFirestore, collection, query, orderBy, onSnapshot, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
-// توليد رقم تسلسلي مشفر وفريد متطابق مع النظام
-function generateSecureSerialNumber() {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let serial = "ETHB-";
-  for (let i = 0; i < 10; i++) {
-    serial += chars.charAt(Math.floor(Math.random() * chars.length));
-    if (i === 4) serial += "-";
-  }
-  return serial;
-}
+
+    function generateSecureSerialNumber() {
+      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      let serial = "ETHB-";
+      for (let i = 0; i < 10; i++) {
+        serial += chars.charAt(Math.floor(Math.random() * chars.length));
+        if (i === 4) serial += "-";
+      }
+      return serial;
+    }
 
     const firebaseConfig = {
       apiKey: "AIzaSyDj5Hr4ONRDgEJLgRMExcYXnJnrS20ge_k",
@@ -99,22 +99,20 @@ function generateSecureSerialNumber() {
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    let currentAdminRole = "auditor"; // الافتراضي مدقق ميداني
+    let currentAdminRole = "auditor";
 
-document.getElementById("adminLoginBtn").onclick = async () => {
-  alert("الزر اشتغل");
-  try {
-    const email = document.getElementById("adminEmail").value;
-    const password = document.getElementById("adminPassword").value;
-    alert("جاري تسجيل الدخول بـ: " + email);
-    await signInWithEmailAndPassword(auth, email, password);
-    document.getElementById("adminLoginMsg").textContent = "";
-    alert("تم تسجيل الدخول بنجاح");
-  } catch (e) {
-    document.getElementById("adminLoginMsg").textContent = "فشل المصادقة الإدارية: " + e.message;
-    alert("خطأ: " + e.message);
-  }
-};
+    document.getElementById("adminLoginBtn").onclick = async () => {
+      alert("الزر اشتغل");
+      try {
+        const email = document.getElementById("adminEmail").value;
+        const password = document.getElementById("adminPassword").value;
+        await signInWithEmailAndPassword(auth, email, password);
+        document.getElementById("adminLoginMsg").textContent = "";
+      } catch (e) {
+        document.getElementById("adminLoginMsg").textContent = "فشل تسجيل الدخول: " + e.message;
+        alert("خطأ: " + e.message);
+      }
+    };
 
     document.getElementById("adminLogoutBtn").onclick = () => signOut(auth);
 
@@ -124,23 +122,19 @@ document.getElementById("adminLoginBtn").onclick = async () => {
         document.getElementById("adminDashboard").classList.remove("hidden");
         document.getElementById("adminLogoutBtn").classList.remove("hidden");
 
-        // جلب صلاحية المشرف من قاعدة البيانات (مجموعة admins، مستند يحمل الـ uid أو البريد)
         try {
           const adminDocRef = doc(db, "admins", user.email);
           const adminSnap = await getDoc(adminDocRef);
           if (adminSnap.exists()) {
             currentAdminRole = adminSnap.data().role || "auditor";
-          } else {
-            currentAdminRole = "auditor"; // لو لم يتم إضافته في قاعدة البيانات يُعامد كمدقق
           }
         } catch(err) {
-          currentAdminRole = "auditor";
+          console.error(err);
         }
 
-        const roleNameAr = currentAdminRole === "super_admin" ? "مشرف عام (Super Admin) - صلاحيات كاملة واعتماد" : "مدقق ميداني (Auditor) - مراجعة وملاحظات فقط";
-        document.getElementById("adminInfoContainer").innerHTML = `<div class="role-badge">صلاحيتك الحالية: ${roleNameAr}</div>`;
+        const roleNameAr = currentAdminRole === "super_admin" ? "مشرف عام" : "مدقق ميداني";
+        document.getElementById("adminInfoContainer").innerHTML = `<div class="role-badge">صلاحيتك: ${roleNameAr}</div>`;
 
-        // جلب الطلبات
         onSnapshot(query(collection(db, "submissions"), orderBy("createdAt", "desc")), (snap) => {
           const list = document.getElementById("adminRequestsList");
           list.innerHTML = "";
@@ -151,32 +145,16 @@ document.getElementById("adminLoginBtn").onclick = async () => {
 
             let actionArea = "";
             if (isProcessed) {
+              actionArea = `<div class="locked-notice">تم اتخاذ قرار نهائي</div>`;
+            } else if (currentAdminRole === "super_admin") {
               actionArea = `
-                <div class="locked-notice">
-                  🔒 تم اتخاذ قرار نهائي بشأن هذا الطلب (${data.status === 'approved' ? 'معتمد' : 'مرفوض'}) ولا يمكن تعديله.
-                </div>
-                <p style="margin-top:8px;"><b>الرد المسجل:</b> ${data.adminReply || "لا توجد ملاحظات إضافية"}</p>
-              `;
+                <textarea id="reply_${id}" placeholder="ملاحظة...">${data.adminReply || ""}</textarea>
+                <div style="display:flex; gap:10px;">
+                  <button class="btn-success" onclick="approveDocument('${id}')">اعتماد</button>
+                  <button class="btn-danger" onclick="rejectDocument('${id}')">رفض</button>
+                </div>`;
             } else {
-              // إذا لم يتم البت في الطلب، نتحقق من صلاحية المشرف
-              if (currentAdminRole === "super_admin") {
-                // المشرف العام يمكنه الاعتماد أو الرفض
-                actionArea = `
-                  <textarea id="reply_${id}" placeholder="اكتب ملاحظة أو توجيه للمستخدم هنا...">${data.adminReply || ""}</textarea>
-                  <div style="display:flex; gap:10px;">
-                    <button class="btn-success" onclick="approveDocument('${id}')">اعتماد رسمي وتوليد رقم تسلسلي</button>
-                    <button class="btn-danger" onclick="rejectDocument('${id}')">رفض الطلب</button>
-                  </div>
-                `;
-              } else {
-                // المدقق الميداني يمكنه فقط حفظ ملاحظات دون زر الاعتماد النهائي
-                actionArea = `
-                  <textarea id="reply_${id}" placeholder="اكتب ملاحظاتك الميدانية هنا...">${data.adminReply || ""}</textarea>
-                  <div style="background:#f0f2f5; padding:8px; border-radius:6px; font-size:12px; color:var(--text-muted); text-align:center;">
-                    ⚠️ حسابك (مدقق ميداني): ليس لديك صلاحية الاعتماد النهائي أو إصدار الأرقام التسلسلية.
-                  </div>
-                `;
-              }
+              actionArea = `<div style="background:#f0f2f5; padding:8px; text-align:center;">صلاحياتك لا تسمح بالاعتماد</div>`;
             }
 
             list.innerHTML += `
@@ -184,11 +162,9 @@ document.getElementById("adminLoginBtn").onclick = async () => {
                 <div class="req-grid">
                   <div><img src="${data.imageUrl}" style="max-width:100%; border-radius:6px;" /></div>
                   <div>
-                    <p><b>المستفيد:</b> ${data.fullName || "-"} (${data.universityId || "-"})</p>
-                    <p><b>رقم الجوال:</b> ${data.phone || "-"}</p>
-                    <p><b>ملاحظة المتقدم:</b> ${data.note || "لا توجد ملاحظات"}</p>
-                    <p><b>الحالة الحالية:</b> <span style="color:${data.status === 'approved' ? 'var(--success)' : (data.status === 'rejected' ? 'var(--danger)' : 'var(--gold-accent)}')">${data.status === 'approved' ? 'معتمد ✅' : (data.status === 'rejected' ? 'مرفوض ❌' : 'قيد الانتظار ⏳')}</span></p>
-                    <p><b>الرقم التسلسلي:</b> ${data.serialNumber || "لم يصدر بعد"}</p>
+                    <p><b>المستفيد:</b> ${data.fullName || "-"}</p>
+                    <p><b>الحالة:</b> ${data.status}</p>
+                    <p><b>الرقم التسلسلي:</b> ${data.serialNumber || "لم يصدر"}</p>
                     ${actionArea}
                   </div>
                 </div>
@@ -204,28 +180,28 @@ document.getElementById("adminLoginBtn").onclick = async () => {
 
     window.approveDocument = async (id) => {
       if (currentAdminRole !== "super_admin") {
-        alert("عذراً، لا تمتلك الصلاحية الكافية (مطلوب مشرف عام).");
+        alert("لا تملك صلاحية الاعتماد");
         return;
       }
-     const serialNumber = generateSecureSerialNumber();
+      const serialNumber = generateSecureSerialNumber();
       await updateDoc(doc(db, "submissions", id), {
         status: "approved",
         serialNumber: serialNumber,
-        adminReply: document.getElementById(`reply_${id}`).value || "تم تدقيق واعتماد المستند بنجاح."
+        adminReply: document.getElementById(`reply_${id}`)?.value || "تم الاعتماد"
       });
-      alert("تم اعتماد الطلب نهائياً وتوليد الرقم التسلسلي بنجاح.");
+      alert("تم الاعتماد بنجاح");
     };
 
     window.rejectDocument = async (id) => {
       if (currentAdminRole !== "super_admin") {
-        alert("عذراً، لا تمتلك الصلاحية الكافية (مطلوب مشرف عام).");
+        alert("لا تملك صلاحية الرفض");
         return;
       }
       await updateDoc(doc(db, "submissions", id), {
         status: "rejected",
-        adminReply: document.getElementById(`reply_${id}`).value || "عذراً، تم رفض المستند لعدم مطابقة الشروط."
+        adminReply: document.getElementById(`reply_${id}`)?.value || "تم الرفض"
       });
-      alert("تم رفض الطلب نهائياً وإغلاق سجله.");
+      alert("تم الرفض");
     };
   </script>
 </body>
