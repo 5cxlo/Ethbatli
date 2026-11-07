@@ -101,14 +101,20 @@ function generateSecureSerialNumber() {
 
     let currentAdminRole = "auditor"; // الافتراضي مدقق ميداني
 
-    document.getElementById("adminLoginBtn").onclick = async () => {
-      try {
-        await signInWithEmailAndPassword(auth, document.getElementById("adminEmail").value, document.getElementById("adminPassword").value);
-        document.getElementById("adminLoginMsg").textContent = "";
-      } catch (e) {
-        document.getElementById("adminLoginMsg").textContent = "فشل المصادقة الإدارية.";
-      }
-    };
+document.getElementById("adminLoginBtn").onclick = async () => {
+  alert("الزر اشتغل");
+  try {
+    const email = document.getElementById("adminEmail").value;
+    const password = document.getElementById("adminPassword").value;
+    alert("جاري تسجيل الدخول بـ: " + email);
+    await signInWithEmailAndPassword(auth, email, password);
+    document.getElementById("adminLoginMsg").textContent = "";
+    alert("تم تسجيل الدخول بنجاح");
+  } catch (e) {
+    document.getElementById("adminLoginMsg").textContent = "فشل المصادقة الإدارية: " + e.message;
+    alert("خطأ: " + e.message);
+  }
+};
 
     document.getElementById("adminLogoutBtn").onclick = () => signOut(auth);
 
