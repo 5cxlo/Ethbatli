@@ -376,7 +376,6 @@ async function advancedDocumentIntegrityCheck(file) {
     });
 
     const result = await response.json();
-alert("النتيجة: " + JSON.stringify(result));
     if (result.status === "success") {
     const isAI = (result.type?.ai_generated > 0.3) || (result.type?.deepfake > 0.3);
       const isLowQuality = result.quality?.score < 0.7;
