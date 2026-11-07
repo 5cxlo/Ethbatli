@@ -86,6 +86,7 @@
       <button class="nav-item active" onclick="showTab('homeTab', this)">الرئيسية</button>
       <button class="nav-item" onclick="showTab('uploadTab', this)">فحص وتوثيق مستند</button>
       <button class="nav-item" onclick="showTab('trackTab', this)">تتبع طلب سابق</button>
+      <button class="nav-item" onclick="showTab('verifySerialTab', this)">التحقق بالرقم التسلسلي</button>
       <button class="nav-item" onclick="showTab('linkTab', this)">التحقق من رابط</button>
       <button class="nav-item" onclick="showTab('requestsTab', this)">طلباتي والمستندات</button>
       <button class="nav-item" onclick="showTab('aboutTab', this)">عن المنصة</button>
@@ -154,6 +155,14 @@
         <div id="trackResultContainer" style="margin-top: 20px;"></div>
       </div>
     </div>
+    <div id="verifySerialTab" class="tab-content hidden">
+  <div class="card-box">
+    <h3>التحقق من المستند بالرقم التسلسلي</h3>
+    <input id="serialInput" type="text" placeholder="أدخل الرقم التسلسلي (مثال: ETHB-XXXX-XXXXXX)" />
+    <button id="verifySerialBtn" class="btn-primary">تحقق الآن</button>
+    <div id="serialResult" style="margin-top:20px;"></div>
+  </div>
+</div>
     <div id="linkTab" class="tab-content hidden">
       <div class="card-box">
         <h3>التحقق الفوري من موثوقية الروابط</h3>
@@ -447,13 +456,14 @@
           const isApproved = data.status === "approved";
           const isRejected = data.status === "rejected";
           const statusText = isApproved ? '<span style="color:var(--success)">معتمد ومصادق ✅</span>' : (isRejected ? '<span style="color:var(--danger)">مرفوض ❌</span>' : '<span style="color:var(--gold-accent)">قيد التدقيق والمراجعة ⏳</span>');
-          html += `
-            <div style="background:#fff; border:1px solid var(--border-color); border-radius:6px; padding:15px; margin-bottom:10px;">
-              <p><b>حالة الطلب:</b> ${statusText}</p>
-              <p><b>الرقم التسلسلي:</b> ${data.serialNumber || "قيد الإصدار بعد الاعتماد"}</p>
-              <p><b>ملاحظة الطلب:</b> ${data.note || "-"}</p>
-              <p><b>رد قسم التدقيق:</b> ${data.adminReply || "بانتظار المراجعة النهائية"}</p>
-            </div>`;
+         html += `
+  <div style="background:#fff; border:1px solid var(--border-color); border-radius:6px; padding:15px; margin-bottom:10px;">
+    <p><b>حالة الطلب:</b> ${statusText}</p>
+    <p><b>الرقم التسلسلي:</b> ${data.serialNumber || "قيد الإصدار بعد الاعتماد"}</p>
+    ${data.imageUrl ? `<img src="${data.imageUrl}" style="max-width:100%; max-height:250px; margin:10px 0; border-radius:6px;" />` : ''}
+    <p><b>ملاحظة الطلب:</b> ${data.note || "-"}</p>
+    <p><b>رد قسم التدقيق:</b> ${data.adminReply || "بانتظار المراجعة النهائية"}</p>
+  </div>`;
         });
         resultContainer.innerHTML = html;
       } catch (e) {
@@ -480,6 +490,31 @@
         res.textContent = "الرابط المكتوب غير صحيح الصياغة.";
       }
     };
+    document.getElementById("verifySerialBtn").onclick = async () => {
+  const serial = document.getElementById("serialInput").value.trim().toUpperCase();
+  const result = document.getElementById("serialResult");
+  if (!serial) return result.innerHTML = "<p style='color:var(--danger)'>أدخل الرقم التسلسلي</p>";
+
+  result.innerHTML = "<p>جاري البحث...</p>";
+  try {
+    const q = query(collection(db, "submissions"), where("serialNumber", "==", serial));
+    const snap = await getDocs(q);
+    if (snap.empty) {
+      result.innerHTML = "<p style='color:var(--danger)'>❌ لا يوجد مستند بهذا الرقم</p>";
+      return;
+    }
+    const data = snap.docs[0].data();
+    result.innerHTML = `
+      <div style="background:#fff; border:1px solid var(--border-color); border-radius:6px; padding:15px;">
+        <p><b>الحالة:</b> ${data.status === "approved" ? "معتمد ✅" : data.status}</p>
+        <p><b>الرقم التسلسلي:</b> ${data.serialNumber}</p>
+        ${data.imageUrl ? `<img src="${data.imageUrl}" style="max-width:100%; max-height:250px; margin:10px 0;" />` : ''}
+        <p><b>الوصف:</b> ${data.note || "-"}</p>
+      </div>`;
+  } catch (e) {
+    result.innerHTML = "<p style='color:var(--danger)'>خطأ: " + e.message + "</p>";
+  }
+};
   </script>
 </body>
 </html>
