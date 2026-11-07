@@ -301,7 +301,7 @@
       if (user) {
         document.getElementById('whoUpload').textContent = "المستخدم: " + (user.phoneNumber || user.uid);
         document.getElementById('whoRequests').textContent = "المستخدم: " + (user.phoneNumber || user.uid);
-        const q = query(collection(db, "submissions"), where("uid", "==", user.uid), orderBy("createdAt", "desc"));
+        const q = query(collection(db, "submissions"), where("phone", "==", user.phoneNumber), orderBy("createdAt", "desc"));
         if (unsub) unsub();
         unsub = onSnapshot(q, (snap) => {
           const list = document.getElementById('list');
