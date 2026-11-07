@@ -359,67 +359,58 @@
 
     let currentUser = null;
     let confirmationResult = null;
+async function advancedDocumentIntegrityCheck(file) {
+  const API_USER = "960029569";
+  const API_SECRET = "KVUH8J225eiCQkU77kgbU6BnLD7kmA4x";
 
-    // محرك الفحص الذكي المطور (يدعم الوضع التلقائي أو الاختبار اليدوي الفوري)
-    async function advancedDocumentIntegrityCheck(file) {
-      return new Promise((resolve) => {
-        const mode = document.getElementById("aiModeSelect").value;
-        
-        if (mode === "force_ai") {
-          setTimeout(() => {
-            resolve({
-              quality_score: "مرفوضة",
-              is_blurred: false,
-              tamper_detected: true,
-              is_ai_generated: "❌ تم رفض المستند: الصورة مولدة بالذكاء الاصطناعي (تم محاكاة كشف التلاعب بنجاح)"
-            });
-          }, 600);
-          return;
-        }
+  const formData = new FormData();
+  formData.append("media", file);
+  formData.append("models", "genai,deepfake,quality");
+  formData.append("api_user", API_USER);
+  formData.append("api_secret", API_SECRET);
 
-        if (mode === "force_valid") {
-          setTimeout(() => {
-            resolve({
-              quality_score: "99%",
-              is_blurred: false,
-              tamper_detected: false,
-              is_ai_generated: "✅ مستند طبيعي موثوق (بشري)"
-            });
-          }, 600);
-          return;
-        }
+  try {
+    const response = await fetch("https://api.sightengine.com/1.0/check.json", {
+      method: "POST",
+      body: formData
+    });
 
-        // الوضع التلقائي (الافتراضي): فحص اسم الملف أو تحليل دقيق
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const img = new Image();
-          img.onload = () => {
-            const name = file.name.toLowerCase();
-            const isSuspicious = name.includes("ai") || name.includes("gen") || name.includes("midjourney") || name.includes("dall") || name.includes("fake");
+    const result = await response.json();
 
-            setTimeout(() => {
-              if (isSuspicious) {
-                resolve({
-                  quality_score: "مرفوضة",
-                  is_blurred: false,
-                  tamper_detected: true,
-                  is_ai_generated: "❌ تم رفض المستند: تبين أن الصورة مولدة بالذكاء الاصطناعي أو معدلة."
-                });
-              } else {
-                resolve({
-                  quality_score: "98%",
-                  is_blurred: false,
-                  tamper_detected: false,
-                  is_ai_generated: "✅ مستند طبيعي موثوق (بشري)"
-                });
-              }
-            }, 600);
-          };
-          img.src = e.target.result;
+    if (result.status === "success") {
+      const isAI = (result.genai?.prob > 0.5) || (result.deepfake?.prob > 0.5);
+      const isLowQuality = result.quality?.score < 0.4;
+
+      if (isAI || isLowQuality) {
+        return {
+          quality_score: "مرفوضة",
+          is_blurred: false,
+          tamper_detected: true,
+          is_ai_generated: isAI 
+            ? "❌ تم رفض المستند: الصورة مولدة أو معدلة بالذكاء الاصطناعي" 
+            : "❌ تم رفض المستند: جودة الصورة منخفضة أو فيها علامات تلاعب"
         };
-        reader.readAsDataURL(file);
-      });
+      } else {
+        return {
+          quality_score: Math.round((result.quality?.score || 0.9) * 100) + "%",
+          is_blurred: false,
+          tamper_detected: false,
+          is_ai_generated: "✅ مستند طبيعي موثوق"
+        };
+      }
+    } else {
+      throw new Error(result.error?.message || "فشل الفحص");
     }
+  } catch (error) {
+    console.error("Sightengine error:", error);
+    return {
+      quality_score: "غير متاح",
+      is_blurred: false,
+      tamper_detected: false,
+      is_ai_generated: "⚠️ تعذر إجراء الفحص الذكي حالياً، حاول مرة أخرى"
+    };
+  }
+}
 
     window.showTab = (tabId, btn) => {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
