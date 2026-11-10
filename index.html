@@ -136,17 +136,16 @@
     </div>
     <div id="trackTab" class="tab-content hidden">
       <div class="card-box">
-        <h3>تتبع حالة الطلب</h3>
-        <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;">أدخل رقم الهوية الوطنية أو رقم الإقامة للاستعلام عن حالة طلبك. لحماية الخصوصية لا تُعرض الصورة ولا الرقم التسلسلي هنا؛ سجّل الدخول من «طلباتي والمستندات» لعرضهما.</p>
-        <input id="trackNationalId" type="text" placeholder="أدخل رقم الهوية الوطنية" />
-        <button id="trackBtn" class="btn-primary">استعلم عن حالة الطلب الآن</button>
+        <h3>تتبع حالة طلباتي</h3>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;">لحماية الخصوصية، يتطلب تتبع الطلبات تسجيل الدخول، ولا يمكن الاستعلام عن طلبات الآخرين برقم الهوية.</p>
+        <button id="trackBtn" class="btn-primary">عرض حالة طلباتي</button>
         <div id="trackResultContainer" style="margin-top:20px;"></div>
       </div>
     </div>
     <div id="verifySerialTab" class="tab-content hidden">
       <div class="card-box">
         <h3>التحقق من المستند بالرقم التسلسلي</h3>
-        <input id="serialInput" type="text" placeholder="أدخل الرقم التسلسلي (مثال: ETHB-XXXX-XXXXXX)" />
+        <input id="serialInput" type="text" placeholder="أدخل الرقم التسلسلي (مثال: ETHB-XXXXX-XXXXX)" />
         <button id="verifySerialBtn" class="btn-primary">تحقق الآن</button>
         <div id="serialResult" style="margin-top:20px;"></div>
       </div>
@@ -190,7 +189,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
     import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
-    import { getFirestore, collection, addDoc, query, where, orderBy, getDocs, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, where, getDocs, getDoc, doc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
     const firebaseConfig = {
       apiKey: "AIzaSyDj5Hr4ONRDgEJLgRMExcYXnJnrS20ge_k",
       authDomain: "ethbatli.firebaseapp.com",
@@ -282,12 +281,13 @@
       if (!user) return;
       document.getElementById("whoUpload").textContent = "المستخدم: " + (user.phoneNumber || user.uid);
       document.getElementById("whoRequests").textContent = "المستخدم: " + (user.phoneNumber || user.uid);
-      const q = query(collection(db, "submissions"), where("phone", "==", user.phoneNumber), orderBy("createdAt", "desc"));
+      const q = query(collection(db, "submissions"), where("uid", "==", user.uid));
       if (unsub) unsub();
       unsub = onSnapshot(q, (snap) => {
+        const docs = snap.docs.slice().sort((a, b) => (b.data().createdAt?.seconds ?? 9e12) - (a.data().createdAt?.seconds ?? 9e12));
         const list = document.getElementById("list");
         list.innerHTML = "";
-        snap.forEach((docSnap) => {
+        docs.forEach((docSnap) => {
           const x = docSnap.data();
           const id = esc(docSnap.id);
           const isApproved = x.status === "approved";
@@ -311,7 +311,7 @@
             </div>`;
         });
         if (!snap.size) list.innerHTML = "<p style='color:var(--text-muted);font-size:14px;'>لا توجد مستندات مرفوعة بانتظار الفحص.</p>";
-        snap.forEach((docSnap) => {
+        docs.forEach((docSnap) => {
           const x = docSnap.data();
           const el = document.getElementById("qr_" + docSnap.id);
           if (x.status === "approved" && x.serialNumber && el && window.QRCode) {
@@ -393,13 +393,12 @@
       }
     };
     document.getElementById("trackBtn").onclick = async () => {
-      const natId = document.getElementById("trackNationalId").value.trim();
       const box = document.getElementById("trackResultContainer");
-      if (!natId) { box.innerHTML = "<p style='color:var(--danger);font-size:14px;'>يرجى إدخال رقم الهوية الوطنية أولاً.</p>"; return; }
+      if (!currentUser) { switchTab("uploadTab", 1); return; }
       box.innerHTML = "<p style='color:var(--primary-green);font-size:14px;'>جاري البحث في السجلات...</p>";
       try {
-        const snap = await getDocs(query(collection(db, "submissions"), where("universityId", "==", natId)));
-        if (snap.empty) { box.innerHTML = "<p style='color:var(--danger);font-size:14px;'>❌ لا توجد طلبات مسجلة برقم الهوية هذا.</p>"; return; }
+        const snap = await getDocs(query(collection(db, "submissions"), where("uid", "==", currentUser.uid)));
+        if (snap.empty) { box.innerHTML = "<p style='color:var(--danger);font-size:14px;'>لا توجد طلبات مسجلة في حسابك.</p>"; return; }
         let html = "";
         snap.forEach((d) => {
           const s = d.data().status;
@@ -426,14 +425,13 @@
       if (!serial) return (result.innerHTML = "<p style='color:var(--danger)'>أدخل الرقم التسلسلي</p>");
       result.innerHTML = "<p>جاري البحث...</p>";
       try {
-        const snap = await getDocs(query(collection(db, "submissions"), where("serialNumber", "==", serial)));
-        if (snap.empty) { result.innerHTML = "<p style='color:var(--danger)'>❌ لا يوجد مستند بهذا الرقم</p>"; return; }
-        const data = snap.docs[0].data();
+        const snap = await getDoc(doc(db, "verifications", serial));
+        if (!snap.exists()) { result.innerHTML = "<p style='color:var(--danger)'>❌ لا يوجد مستند بهذا الرقم</p>"; return; }
+        const data = snap.data();
         result.innerHTML = `<div style="background:#fff;border:1px solid var(--border-color);border-radius:6px;padding:15px;">
           <p><b>الحالة:</b> ${data.status === "approved" ? "معتمد ✅" : esc(data.status)}</p>
-          <p><b>الرقم التسلسلي:</b> ${esc(data.serialNumber)}</p>
-          ${data.imageUrl ? `<img src="${esc(data.imageUrl)}" style="max-width:100%;max-height:250px;margin:10px 0;" />` : ""}
-          <p><b>الوصف:</b> ${esc(data.note || "-")}</p></div>`;
+          <p><b>الرقم التسلسلي:</b> ${esc(serial)}</p>
+          ${data.imageUrl ? `<img src="${esc(data.imageUrl)}" style="max-width:100%;max-height:250px;margin:10px 0;" />` : ""}</div>`;
       } catch (e) { result.innerHTML = "<p style='color:var(--danger)'>خطأ: " + esc(e.message) + "</p>"; }
     };
     const m = location.hash.match(/^#verify=(.+)$/);
