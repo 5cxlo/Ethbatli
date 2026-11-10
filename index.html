@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>أثبت لي - منصة المصادقة الرقمية (نموذج تجريبي)</title>
+  <title>[تجربة] أثبت لي</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -217,10 +217,11 @@
         if (result.status === "success") {
           const isAI = (result.type?.ai_generated > 0.3) || (result.type?.deepfake > 0.3);
           const isLowQuality = result.quality?.score < 0.7;
+          const dbg = "ai=" + (result.type?.ai_generated ?? "-") + " | deepfake=" + (result.type?.deepfake ?? "-") + " | quality=" + (result.quality?.score ?? "-");
           if (isAI || isLowQuality) {
-            return { quality_score: "مرفوضة", is_blurred: false, tamper_detected: true, is_ai_generated: isAI ? "❌ تم رفض المستند: الصورة مولدة أو معدلة بالذكاء الاصطناعي" : "❌ تم رفض المستند: جودة الصورة منخفضة أو فيها علامات تلاعب" };
+            return { quality_score: "مرفوضة", is_blurred: false, tamper_detected: true, debug: dbg, is_ai_generated: isAI ? "❌ تم رفض المستند: الصورة مولدة أو معدلة بالذكاء الاصطناعي" : "❌ تم رفض المستند: جودة الصورة منخفضة أو فيها علامات تلاعب" };
           }
-          return { quality_score: Math.round((result.quality?.score || 0.9) * 100) + "%", is_blurred: false, tamper_detected: false, is_ai_generated: "✅ مستند طبيعي موثوق" };
+          return { quality_score: Math.round((result.quality?.score || 0.9) * 100) + "%", is_blurred: false, tamper_detected: false, debug: dbg, is_ai_generated: "✅ مستند طبيعي موثوق" };
         }
         throw new Error(result.error?.message || "فشل الفحص");
       } catch (error) {
@@ -367,7 +368,7 @@
         const aiReport = await advancedDocumentIntegrityCheck(file);
         if (aiReport.tamper_detected) {
           uploadMsg.style.color = "var(--danger)";
-          uploadMsg.textContent = aiReport.is_ai_generated;
+          uploadMsg.textContent = aiReport.is_ai_generated + "   [" + (aiReport.debug || "") + "]";
           return;
         }
         const base64Img = await processImageCompression(file);
@@ -384,7 +385,7 @@
           createdAt: serverTimestamp()
         });
         uploadMsg.style.color = "var(--success)";
-        uploadMsg.textContent = "تم فحص المستند بنجاح واجتياز الفحص الآلي وتم إرساله لقسم التدقيق.";
+        uploadMsg.textContent = "تم فحص المستند بنجاح واجتياز الفحص الآلي وتم إرساله لقسم التدقيق.   [" + (aiReport.debug || "") + "]";
         fileInput.value = "";
         document.getElementById("docNote").value = "";
       } catch (e) {
